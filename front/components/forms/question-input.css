@@ -1,0 +1,46 @@
+:host {
+   padding-top: 10px;
+   padding-bottom: 10px;
+}
+
+:host, textarea {
+   display: block;
+   box-sizing: border-box;
+}
+
+.number {
+   float: left;
+}
+
+.container {
+   padding: 20px;
+   padding-left: 0px;
+}
+
+textarea {
+   width: 100%;
+   padding: 10px;
+   outline: none;
+   border-color: #DDD;
+   transition: border-color 0.2s ease-in-out;
+   min-height: 150px;
+}
+
+textarea:focus {
+   border-color: black;
+}
+
+.number {
+   padding: 20px;
+   color: gray;
+   font-size: xx-large;
+}
+
+.prompt, textarea {
+   padding-bottom: 20px;
+}
+
+paper-slider {
+   display: block;
+   margin: auto;
+}

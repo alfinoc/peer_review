@@ -1,0 +1,24 @@
+<link rel="import" href="/components/standard/paper-slider/paper-slider.html">
+
+<polymer-element name="question-input">
+   <template>
+      <link rel="stylesheet" type="text/css" href="/components/forms/question-input.css">
+      <div layout horizontal>
+         <div class="number">#{{ number }}</div>
+         <div class="container" flex>
+            <div class="prompt">{{ prompt }}</div>
+            <textarea placeholder="your response"></textarea>
+         </div>
+      </div>
+   </template>
+      <script>
+
+Polymer('question-input', {
+   publish: {
+      number: null,
+      prompt: ''
+   }
+});
+
+   </script>
+</polymer-element>

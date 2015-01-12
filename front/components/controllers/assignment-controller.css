@@ -1,0 +1,49 @@
+:host {
+   display: block;
+   padding-top: 20px;
+   padding-bottom: 20px;
+}
+
+question-input:nth-child(even) {
+   background-color: #EEE;
+}
+
+question-input {
+   /* border-bottom: 1px solid #64B5F6;*/
+}
+
+.slantbanner * {
+   display: inline-block;
+}
+
+.slantbanner .buffer {
+   width: 20px;
+   height: 20px;
+   background-color: black;
+}
+
+.buttoncontainer span:nth-child(1) {
+   color: #3F51B5;
+}
+
+.buttoncontainer span:nth-child(2) {
+   color: #009688;
+}
+
+.buttoncontainer {
+   font-size: 40pt;
+   margin: 10px;
+   text-transform: lowercase;
+}
+
+#save {
+   /* red */
+   color: #B71C1C;
+   background-color: #FFEBEE;
+}
+
+#save.saved {
+   /* green */
+   color: #1B5E20;
+   background-color: #E8F5E9;
+}

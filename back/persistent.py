@@ -9,14 +9,14 @@ class StoreEntry:
    def asDict(self):
       res = {}
       for prop in self._serializable:
-         res[prop] = self._serializable[prop]
+         res[prop] = getattr(self, prop)
       return res
 
    def addSerialProperty(self, name, value):
       if not hasattr(self, '_serializable'):
-         self._serializable = {}
+         self._serializable = []
       setattr(self, name, value)
-      self._serializable[name] = value
+      self._serializable.append(name)
 
 class Course(StoreEntry):
    def __init__(self, title='Untitled', assignments=[], participants=[]):
@@ -47,7 +47,6 @@ Key scheme:
    <id>:quest -> QuestionHash
    <id>:resp -> ResponseHash
 """
-
 def _suffix(self, str, suffix):
    return str + ':' + suffix
 
@@ -103,4 +102,3 @@ class RedisStore:
       prev = loads(self.store.hget(course_key, listKey))
       prev.append(value)
       self.store.hset(course_key, listKey, prev)
-
