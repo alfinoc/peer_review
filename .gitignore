@@ -2,3 +2,4 @@
 data/*
 bower*
 front/components/standard
+back/load_dummy_data.py

@@ -1,12 +1,14 @@
-import os
+from os import path 
 from service import PeerReviewService
 from werkzeug.wsgi import SharedDataMiddleware
 
 def create_app():
-   app = PeerReviewService()
+   currPath = path.dirname(__file__)
+   template_path = path.join(currPath, '../front')
+   app = PeerReviewService(template_path)
    app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
-      '/assignment': os.path.join(os.path.dirname(__file__), '../front/assignment.html'),
-      '/global':  os.path.join(os.path.dirname(__file__), '../front/global'),
-      '/components':  os.path.join(os.path.dirname(__file__), '../front/components'),
+      '/assignment': path.join(currPath, '../front/assignment.html'),
+      '/global':  path.join(currPath, '../front/global'),
+      '/components':  path.join(currPath, '../front/components'),
    })
    return app
