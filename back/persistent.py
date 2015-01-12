@@ -47,8 +47,8 @@ Key scheme:
    <id>:quest -> QuestionHash
    <id>:resp -> ResponseHash
 """
-def _suffix(self, str, suffix):
-   return str + ':' + suffix
+def _suffix(s, suffix):
+   return str(s) + ':' + str(suffix)
 
 class RedisStore:
    def __init__(self):
@@ -58,21 +58,23 @@ class RedisStore:
          raise IOError
 
    def addCourse(self, course):
-      return self._setEntry(self, 'course', course)
+      course_id = self._setEntry('course', course)
+      self.store.rpush('all_courses', course_id)
+      return course_id
 
    def addAssignment(self, course_id, assignment):
-      newAsst = self._setEntry(self, 'asst', assignment)
+      newAsst = self._setEntry('asst', assignment)
       self._pushToHashList(_suffix(course_id, 'course'), 'assignments', newAsst)
       return newAsst
 
    def addQuestion(self, assignment_id, question):
-      newQuestion = self._setEntry(self, 'quest', question)
-      self._pushToHashList(_suffix(course_id, 'asst'), 'questions', newQuestion)
+      newQuestion = self._setEntry('quest', question)
+      self._pushToHashList(_suffix(assignment_id, 'asst'), 'questions', newQuestion)
       return newQuestion
 
-   def addResponse(self, response):
-      newResponse = self._setEntry(self, 'resp', response)
-      self._pushToHashList(_suffix(course_id, 'quest'), 'responses', newResponse)
+   def addResponse(self, question_id, response):
+      newResponse = self._setEntry('resp', response)
+      self._pushToHashList(_suffix(question_id, 'quest'), 'responses', newResponse)
       return newResponse
 
    def getCourse(self, course_id):
@@ -87,8 +89,8 @@ class RedisStore:
    def getResponse(self, response_id):
       return self._getEntry(response_id, 'asst')
 
-   def _getEntry(self, suffix, id):
-      self.store.hgetall(_suffix(id, suffix))
+   def _getEntry(self, id, suffix):
+      return self.store.hgetall(_suffix(id, suffix))
 
    def _setEntry(self, suffix, entry):
       nextId = self._getNewId(suffix)
@@ -99,6 +101,6 @@ class RedisStore:
       return self.store.incr(_suffix('last_term_id', suffix))
 
    def _pushToHashList(self, hashKey, listKey, value):
-      prev = loads(self.store.hget(course_key, listKey))
+      prev = loads(self.store.hget(hashKey, listKey))
       prev.append(value)
-      self.store.hset(course_key, listKey, prev)
+      self.store.hset(hashKey, listKey, prev)

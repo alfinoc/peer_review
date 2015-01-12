@@ -5,33 +5,25 @@ from werkzeug.exceptions import HTTPException, BadRequest
 from persistent import RedisStore
 
 def missingParams(actual, required):
-   return filter(lambda p : not p in required, actual)
+   notFound = filter(lambda p : not p in required, actual)
    if len(notFound) > 1:
+      notFound = map(lambda s : '"' + s + '"', notFound)
+      print 'lolololol'
       return BadRequest('Required parameters: ' + (', '.join(params)))
-   notFound = map(lambda s : '"' + s + '"', notFound)
    return None
 
 class PeerReviewService(object):
-   def get_assignment_page(self, request):
+   def get_assignment_data(self, request):
       missing = missingParams(request.args, ['assignment'])
       if missing != None:
          return missing
       # TODO: check auth and assigned
-      return self.render('assignment.html', request.args['assignment'])
-
-   def get_assignment_data(self, request):
-      if not 'assignment' in request.args:
-         return requiredParameterError(['assignment'])
-      # TODO: check auth and assigned
-      questions = [{'id': 1, 'prompt': 'heh'}]
-      course = {'id': 2, 'name': 'phil 101'}
-
-      return self.render('templates/survey.js', course=course, questions=questions,
-                         name="assignment 7")
+      assignment = self.store.getAssignment(request.args['assignment'])
+      questions = map(self.store.getQuestion, assignment['questions'])
+      return self.render('templates/survey.js', questions=questions, name="assignment 7")
 
    def __init__(self, template_path):
       self.url_map = Map([
-         Rule('/assignment', endpoint='assignment_page'),
          Rule('/survey', endpoint='assignment_data'),
          Rule('/<all>', redirect_to='/'),
       ])

@@ -8,10 +8,6 @@ question-input:nth-child(even) {
    background-color: #EEE;
 }
 
-question-input {
-   /* border-bottom: 1px solid #64B5F6;*/
-}
-
 .slantbanner * {
    display: inline-block;
 }

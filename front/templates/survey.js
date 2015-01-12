@@ -1,14 +1,6 @@
-if (window.EXTERNS == undefined) {
-   window.EXTERNS = {};
-}
-
-window.EXTERNS.getSurvey = function() {
-   return {
+{
+   "survey": {
       "name": "{{ name }}",
-      "course": {
-         "id": "{{ course.id }}",
-         "name": "{{ course.name }}"
-      },
       "questions": [
       {% for q in questions %}
          {
@@ -17,5 +9,5 @@ window.EXTERNS.getSurvey = function() {
          }
       {% endfor %}
       ]
-   };
+   }
 }
