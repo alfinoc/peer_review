@@ -4,7 +4,7 @@
    padding-bottom: 20px;
 }
 
-question-input:nth-child(odd) {
+::content question-input:nth-child(even) {
    background-color: #EEE;
 }
 

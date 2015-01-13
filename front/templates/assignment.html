@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title></title>
+   <!-- Statically loaded extern file. -->
+   <script src="global/externs.js"></script>
+   <script src="components/standard/webcomponentsjs/webcomponents.js"></script>
+   <link rel="stylesheet" type="text/css" href="global/main.css">
+   <link rel="import" href="components/standard/polymer/polymer.html">
+   <link rel="import" href="components/controllers/assignment-survey.html">
+</head>
+<body>
+   <assignment-survey name="{{ name }}" course="{{ course }}">
+   {% for q in questions %}
+      <question-input prompt="{{ q.prompt }}" number="{{ loop.index }}"></question-input>
+   {% endfor %}
+   </assignment-survey>
+</body>
+</html>

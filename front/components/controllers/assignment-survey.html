@@ -1,0 +1,39 @@
+<link rel="import" href="/components/forms/question-input.html">
+<link rel="import" href="/components/standard/core-ajax/core-ajax.html">
+<link rel="import" href="/components/standard/paper-button/paper-button.html">
+
+<polymer-element name="assignment-survey">
+   <template>
+      <link rel="stylesheet" type="text/css" href="/components/controllers/assignment-survey.css">
+      <div layout horizontal>
+         <div class="buttoncontainer" flex>
+            <span>{{ course }}</span>
+            <span>{{ name }}</span>
+         </div>
+         <div self-center>
+            <paper-button id="save" class="saved" raised>Save</paper-button>
+            <paper-button id="submit" raised>Submit</paper-button>
+         </div>
+      </div>
+      <content></content>
+   </template>
+      <script>
+
+Polymer('assignment-survey', {
+   publish: {
+      key: null,
+      name: '',
+      course: '',
+      questions: []
+   },
+
+   created: function() {
+      this.key = window.URL_PARAMS['assignment'];
+      this.name = '';
+      this.course = '';
+      this.questions = [];
+   }
+});
+
+   </script>
+</polymer-element>

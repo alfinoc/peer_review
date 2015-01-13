@@ -19,7 +19,7 @@ def subset(dict, keys):
    return res
 
 class PeerReviewService(object):
-   def get_assignment_data(self, request):
+   def get_survey(self, request):
       missing = missingParams(request.args, ['assignment'])
       print missing
       if missing != None:
@@ -27,32 +27,31 @@ class PeerReviewService(object):
 
       # TODO: check auth and assigned
       
-      resp = {}
-
       # Get assignment information.
       assignment = self.store.getAssignment(request.args['assignment'])
       questions = map(self.store.getQuestion, loads(assignment['questions']))
       questions = map(lambda q : subset(q, ['prompt']), questions)
-      survey = {'questions': questions, 'name': assignment['title']}
-
-      resp['survey'] = survey
 
       # Get course information if requested.
+      course = ''
       if 'course' in request.args:
          course = self.store.getCourse(request.args['course'])
-         course = subset(course, ['title'])
-         resp['course'] = course
+         if course != None:
+            course = course['title']
 
-      return Response(dumps(resp))
+      return self.render('assignment.html',
+                          name=assignment['title'],
+                          course=course,
+                          questions=questions)
 
    def __init__(self, template_path):
       self.url_map = Map([
-         Rule('/survey', endpoint='assignment_data'),
+         Rule('/survey', endpoint='survey'),
          Rule('/<all>', redirect_to='/'),
       ])
       self.store = RedisStore()
-      #self.jinja_env = Environment(loader=FileSystemLoader(template_path),
-      #                             autoescape=True)
+      self.jinja_env = Environment(loader=FileSystemLoader(template_path),
+                                   autoescape=True)
 
    def wsgi_app(self, environ, start_response):
       request = Request(environ);
