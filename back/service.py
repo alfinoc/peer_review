@@ -3,25 +3,47 @@ from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import HTTPException, BadRequest
 from persistent import RedisStore
-from json import loads
+from json import loads, dumps
 
 def missingParams(actual, required):
-   notFound = filter(lambda p : not p in required, actual)
-   if len(notFound) > 1:
+   notFound = filter(lambda p : not p in actual, required)
+   if len(notFound) > 0:
       notFound = map(lambda s : '"' + s + '"', notFound)
-      return BadRequest('Required parameters: ' + (', '.join(params)))
+      return BadRequest('Required parameters: ' + (', '.join(notFound)))
    return None
+
+def subset(dict, keys):
+   res = {}
+   for k in keys:
+      res[k] = dict[k]
+   return res
 
 class PeerReviewService(object):
    def get_assignment_data(self, request):
       missing = missingParams(request.args, ['assignment'])
+      print missing
       if missing != None:
          return missing
+
       # TODO: check auth and assigned
+      
+      resp = {}
+
+      # Get assignment information.
       assignment = self.store.getAssignment(request.args['assignment'])
       questions = map(self.store.getQuestion, loads(assignment['questions']))
-      print questions
-      return self.render('survey.template', questions=questions, name="assignment 7")
+      questions = map(lambda q : subset(q, ['prompt']), questions)
+      survey = {'questions': questions, 'name': assignment['title']}
+
+      resp['survey'] = survey
+
+      # Get course information if requested.
+      if 'course' in request.args:
+         course = self.store.getCourse(request.args['course'])
+         course = subset(course, ['title'])
+         resp['course'] = course
+
+      return Response(dumps(resp))
 
    def __init__(self, template_path):
       self.url_map = Map([
@@ -29,8 +51,8 @@ class PeerReviewService(object):
          Rule('/<all>', redirect_to='/'),
       ])
       self.store = RedisStore()
-      self.jinja_env = Environment(loader=FileSystemLoader(template_path),
-                                   autoescape=True)
+      #self.jinja_env = Environment(loader=FileSystemLoader(template_path),
+      #                             autoescape=True)
 
    def wsgi_app(self, environ, start_response):
       request = Request(environ);

@@ -1,4 +1,5 @@
 <link rel="import" href="/components/forms/question-input.html">
+<link rel="import" href="/components/standard/core-ajax/core-ajax.html">
 <link rel="import" href="/components/standard/paper-button/paper-button.html">
 
 <polymer-element name="assignment-controller">
@@ -6,22 +7,53 @@
       <link rel="stylesheet" type="text/css" href="/components/controllers/assignment-controller.css">
       <div layout horizontal>
          <div class="buttoncontainer" flex>
-            <span>phil 101</span>
-            <span>assignment two</span>
+            <span>{{ course }}</span>
+            <span>{{ name }}</span>
          </div>
          <div self-center>
             <paper-button id="save" class="saved" raised>Save</paper-button>
             <paper-button id="submit" raised>Submit</paper-button>
          </div>
       </div>
-      <question-input prompt="What is your favorite color?" number="1"></question-input>
-      <question-input prompt="Why would you ask a question like that?" number="2"></question-input>
-      <question-input prompt="How about a third question?" number="3"></question-input>
+      <template repeat="{{ q, i in questions }}">
+         <question-input prompt="{{ q.prompt }}" number="{{ i + 1 }}"></question-input>
+      </template>
+      <core-ajax id="ajax" url="/survey" handleAs="json" on-core-response="{{ loadSurvey }}"></core-ajax>
    </template>
       <script>
 
 Polymer('assignment-controller', {
+   created: function() {
+      this.key = window.URL_PARAMS['assignment'];
+      this.name = '';
+      this.course = '';
+      this.questions = [];
+   },
+      
+   domReady: function() {
+      if (this.key) {
+         this.$.ajax.params = { 'assignment': this.key };
+         var course_id;
+         if (course_id = window.URL_PARAMS['course'])
+            this.$.ajax.params['course'] = course_id
+         this.$.ajax.go();
+      }
+   },
 
+   loadSurvey: function(e) {
+      var data = e.detail.response;
+      console.log(data);
+      if (data && data['survey']) {
+         var survey = data['survey'];
+         var course = data['course'];
+         if (survey['questions'])
+            this.questions = survey['questions'];
+         if (survey['name'])
+            this.name = survey['name'];
+         if (course['title'])
+            this.course = course['title'];
+      }
+   }
 });
 
    </script>
