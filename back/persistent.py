@@ -84,10 +84,10 @@ class RedisStore:
       return self._getEntry(assignment_id, 'asst')
 
    def getQuestion(self, question_id):
-      return self._getEntry(question_id, 'asst')
+      return self._getEntry(question_id, 'quest')
 
    def getResponse(self, response_id):
-      return self._getEntry(response_id, 'asst')
+      return self._getEntry(response_id, 'resp')
 
    def _getEntry(self, id, suffix):
       return self.store.hgetall(_suffix(id, suffix))

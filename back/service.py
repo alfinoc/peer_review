@@ -3,12 +3,12 @@ from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import HTTPException, BadRequest
 from persistent import RedisStore
+from json import loads
 
 def missingParams(actual, required):
    notFound = filter(lambda p : not p in required, actual)
    if len(notFound) > 1:
       notFound = map(lambda s : '"' + s + '"', notFound)
-      print 'lolololol'
       return BadRequest('Required parameters: ' + (', '.join(params)))
    return None
 
@@ -19,8 +19,9 @@ class PeerReviewService(object):
          return missing
       # TODO: check auth and assigned
       assignment = self.store.getAssignment(request.args['assignment'])
-      questions = map(self.store.getQuestion, assignment['questions'])
-      return self.render('templates/survey.js', questions=questions, name="assignment 7")
+      questions = map(self.store.getQuestion, loads(assignment['questions']))
+      print questions
+      return self.render('survey.template', questions=questions, name="assignment 7")
 
    def __init__(self, template_path):
       self.url_map = Map([
