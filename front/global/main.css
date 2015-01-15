@@ -11,6 +11,11 @@ body > * {
    margin: auto;
 }
 
+* input, * textarea {
+   font-family: inherit;
+   font-size: inherit;
+}
+
 * /deep/ input, * /deep/ textarea {
    font-family: inherit;
    font-size: inherit;

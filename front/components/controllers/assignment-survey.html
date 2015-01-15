@@ -1,6 +1,7 @@
 <link rel="import" href="/components/forms/question-input.html">
 <link rel="import" href="/components/standard/core-ajax/core-ajax.html">
 <link rel="import" href="/components/standard/paper-button/paper-button.html">
+<link rel="import" href="/components/standard/paper-toast/paper-toast.html">
 
 <polymer-element name="assignment-survey">
    <template>
@@ -12,9 +13,11 @@
          </div>
          <div self-center>
             <paper-button id="save" class="saved" raised>Save</paper-button>
-            <paper-button id="submit" raised>Submit</paper-button>
+            <paper-button id="submit" on-click="{{ attemptSubmit }}" raised>Submit</paper-button>
          </div>
       </div>
+      <core-ajax id="ajax" method="POST" url="/respond/survey" on-core-error="{{ handleError }}"></core-ajax>
+      <paper-toast id="toast" text='Error on submission! Make sure to save your answers offline, and try again later.'></paper-toast>
       <content></content>
    </template>
       <script>
@@ -23,15 +26,27 @@ Polymer('assignment-survey', {
    publish: {
       key: null,
       name: '',
-      course: '',
-      questions: []
+      course: ''
    },
 
    created: function() {
       this.key = window.URL_PARAMS['assignment'];
       this.name = '';
       this.course = '';
-      this.questions = [];
+   },
+
+   attemptSubmit: function() {
+      var form = { 'assignment': this.key };
+      var questions = this.querySelectorAll('question-input').array();
+      questions.forEach(function(q) {
+         form[q.key] = q.getResponse();
+      });
+      this.$.ajax.params = form;
+      this.$.ajax.go();
+   },
+
+   handleError: function() {
+      this.$.toast.show();
    }
 });
 

@@ -7,7 +7,7 @@
          <div class="number">#{{ number }}</div>
          <div class="container" flex>
             <div class="prompt">{{ prompt }}</div>
-            <textarea placeholder="your response"></textarea>
+            <textarea id="response" placeholder="your response"></textarea>
          </div>
       </div>
    </template>
@@ -16,7 +16,12 @@
 Polymer('question-input', {
    publish: {
       number: null,
-      prompt: ''
+      prompt: '',
+      key: null
+   },
+
+   getResponse: function() {
+      return this.$.response.value;
    }
 });
 

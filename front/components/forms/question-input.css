@@ -21,6 +21,7 @@ textarea {
    width: 100%;
    padding: 10px;
    outline: none;
+   border: 1px solid;
    border-color: #DDD;
    transition: border-color 0.2s ease-in-out;
    min-height: 150px;

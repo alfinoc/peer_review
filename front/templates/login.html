@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>login</title>
+</head>
+<body>
+   <form action="dashboard" method="post">
+      <input name="username" type="text" placeholder="username">
+      <input name="password" type="password" placeholder="password">
+      <input type="Submit">
+   </form>
+   {% if error %}
+   error!
+   {% endif %}
+</body>
+</html>
