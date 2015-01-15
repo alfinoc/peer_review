@@ -1,0 +1,54 @@
+form {
+   width: 30%;
+   margin: auto;
+   padding: 20px;
+   margin-top: 20%;
+   text-align: right;
+   border: 1px solid #DDD;
+}
+
+form input:not(:last-child) {
+   box-sizing: border-box;
+   padding: 5px;
+   width: 100%;
+   margin-bottom: 20px;
+   text-align: left;
+   border: 0;
+   border-bottom: 1px solid;
+   border-color: #DDD;
+   outline: none;
+   transition: border-color 0.2s ease-in-out;
+}
+
+form input:not(:last-child):focus {
+   border-color: black;
+}
+
+input:last-child {
+   display: inline-block;
+}
+
+.error {
+   float: left;
+   color: #D32F2F;
+}
+
+::-webkit-input-placeholder {
+   font-style: italic;
+   font-weight: lighter;
+}
+
+:-moz-placeholder {  /* Firefox 18- */
+   font-style: italic;
+   font-weight: lighter;
+}
+
+::-moz-placeholder {  /* Firefox 19+ */
+   font-style: italic;
+   font-weight: lighter;
+}
+
+:-ms-input-placeholder {
+   font-style: italic;
+   font-weight: lighter;
+}

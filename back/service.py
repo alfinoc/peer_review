@@ -78,7 +78,7 @@ class PeerReviewService(object):
             return self.get_login('login.html')
          username = form.get('username')
          password = form.get('password')
-         if HACKY_DUMMY[username] == password:
+         if username in HACKY_DUMMY and HACKY_DUMMY[username] == password:
             request.login(username)
          else:
             return self.get_login(request, True)

@@ -2,15 +2,17 @@
 <html>
 <head>
    <title>login</title>
+   <link rel="stylesheet" type="text/css" href="global/main.css">
+   <link rel="stylesheet" type="text/css" href="global/login.css">
 </head>
 <body>
-   <form action="dashboard" method="post">
-      <input name="username" type="text" placeholder="username">
-      <input name="password" type="password" placeholder="password">
-      <input type="Submit">
-   </form>
-   {% if error %}
-   error!
-   {% endif %}
+   <div>
+      <form action="dashboard" method="post">
+         <input name="username" type="text" placeholder="username" autofocus>
+         <input name="password" type="password" placeholder="password">
+         {% if error %}<div class="error"> incorrect password </div>{% endif %}
+         <input type="Submit">
+      </form>
+   </div>
 </body>
 </html>
