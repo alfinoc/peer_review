@@ -2,7 +2,7 @@ from jinja2 import Environment, FileSystemLoader
 from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import HTTPException, BadRequest
-from persistent import RedisStore
+from persistent import RedisStore, Answer
 from json import loads, dumps
 
 def missingParams(actual, required):
@@ -19,6 +19,20 @@ def subset(dict, keys):
    return res
 
 class PeerReviewService(object):
+   def get_respond_survey(self, request):
+      missing = missingParams(request.args, ['assignment'])
+      if missing != None:
+         return missing
+      # TODO: check auth and assigned
+      for questionKey in set(request.args) - set(['assignment']):
+         value = request.args[questionKey].strip()
+         if value == '':
+            continue
+         if self.store.getQuestion(questionKey) == None:
+            return BadRequest('Question with id {0} not defined.'.format(questionKey))
+         self.store.addAnswer(questionKey, Answer(value))
+      return Response('Successfully recorded responses.')
+
    def get_survey(self, request):
       missing = missingParams(request.args, ['assignment'])
       print missing
@@ -26,11 +40,16 @@ class PeerReviewService(object):
          return missing
 
       # TODO: check auth and assigned
-      
+
+      def getQuestionWithKey(questionKey):
+         print questionKey
+         dict = self.store.getQuestion(questionKey)
+         dict['key'] = questionKey
+         return dict
+
       # Get assignment information.
       assignment = self.store.getAssignment(request.args['assignment'])
-      questions = map(self.store.getQuestion, loads(assignment['questions']))
-      questions = map(lambda q : subset(q, ['prompt']), questions)
+      questions = map(getQuestionWithKey, loads(assignment['questions']))
 
       # Get course information if requested.
       course = ''
@@ -46,6 +65,7 @@ class PeerReviewService(object):
 
    def __init__(self, template_path):
       self.url_map = Map([
+         Rule('/respond/survey', endpoint="respond_survey"),
          Rule('/survey', endpoint='survey'),
          Rule('/<all>', redirect_to='/'),
       ])

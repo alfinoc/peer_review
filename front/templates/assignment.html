@@ -12,7 +12,7 @@
 <body>
    <assignment-survey name="{{ name }}" course="{{ course }}">
    {% for q in questions %}
-      <question-input prompt="{{ q.prompt }}" number="{{ loop.index }}"></question-input>
+      <question-input prompt="{{ q.prompt }}" number="{{ loop.index }}" key="{{ q.key }}"></question-input>
    {% endfor %}
    </assignment-survey>
 </body>

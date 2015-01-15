@@ -6,6 +6,9 @@ HOST = 'localhost'
 PORT = '6379'
 
 class StoreEntry:
+   def __init__(self):
+      self._serializable = []
+
    def asDict(self):
       res = {}
       for prop in self._serializable:
@@ -13,29 +16,31 @@ class StoreEntry:
       return res
 
    def addSerialProperty(self, name, value):
-      if not hasattr(self, '_serializable'):
-         self._serializable = []
       setattr(self, name, value)
       self._serializable.append(name)
 
 class Course(StoreEntry):
    def __init__(self, title='Untitled', assignments=[], participants=[]):
+      StoreEntry.__init__(self)
       self.addSerialProperty('title', title)
       self.addSerialProperty('assignments', assignments)
       self.addSerialProperty('participants', participants)
 
 class Assignment(StoreEntry):
    def __init__(self, title='Untitled', questions=[]):
+      StoreEntry.__init__(self)
       self.addSerialProperty('title', title)
       self.addSerialProperty('questions', questions)
 
 class Question(StoreEntry):
    def __init__(self, prompt='Question Prompt'):
+      StoreEntry.__init__(self)
       self.addSerialProperty('prompt', prompt)
-      self.addSerialProperty('responses', [])
+      self.addSerialProperty('answers', [])
 
-class Response(StoreEntry):
+class Answer(StoreEntry):
    def __init__(self, text='', value=None):
+      StoreEntry.__init__(self)
       self.addSerialProperty('text', text)
       self.addSerialProperty('value', value)
 
@@ -45,7 +50,7 @@ Key scheme:
    <id>:course -> CourseHash
    <id>:asst -> AssignmentHash
    <id>:quest -> QuestionHash
-   <id>:resp -> ResponseHash
+   <id>:answer -> AnswerHash
 """
 def _suffix(s, suffix):
    return str(s) + ':' + str(suffix)
@@ -72,10 +77,10 @@ class RedisStore:
       self._pushToHashList(_suffix(assignment_id, 'asst'), 'questions', newQuestion)
       return newQuestion
 
-   def addResponse(self, question_id, response):
-      newResponse = self._setEntry('resp', response)
-      self._pushToHashList(_suffix(question_id, 'quest'), 'responses', newResponse)
-      return newResponse
+   def addAnswer(self, question_id, answer):
+      newAnswer = self._setEntry('answer', answer)
+      self._pushToHashList(_suffix(question_id, 'quest'), 'answers', newAnswer)
+      return newAnswer
 
    def getCourse(self, course_id):
       return self._getEntry(course_id, 'course')
@@ -86,11 +91,12 @@ class RedisStore:
    def getQuestion(self, question_id):
       return self._getEntry(question_id, 'quest')
 
-   def getResponse(self, response_id):
-      return self._getEntry(response_id, 'resp')
+   def getAnswer(self, answer_id):
+      return self._getEntry(answer_id, 'answer')
 
    def _getEntry(self, id, suffix):
-      return self.store.hgetall(_suffix(id, suffix))
+      hashValue = self.store.hgetall(_suffix(id, suffix))
+      return hashValue if len(hashValue) != 0 else None
 
    def _setEntry(self, suffix, entry):
       nextId = self._getNewId(suffix)
