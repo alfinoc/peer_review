@@ -6,12 +6,7 @@ from werkzeug.utils import redirect
 from werkzeug.contrib.securecookie import SecureCookie
 from persistent import RedisStore, Answer
 from json import loads, dumps
-from session import SessionRequest
-
-HACKY_DUMMY = {
-   'user': 'password',
-   'admin': 'lol'
-}
+from session import SessionRequest, Authenticator
 
 def missingParams(actual, required):
    notFound = filter(lambda p : not p in actual, required)
@@ -51,7 +46,6 @@ class PeerReviewService(object):
       # TODO: check auth and assigned
 
       def getQuestionWithKey(questionKey):
-         print questionKey
          dict = self.store.getQuestion(questionKey)
          dict['key'] = questionKey
          return dict
@@ -71,22 +65,31 @@ class PeerReviewService(object):
                          course=course, questions=questions)
 
    def get_dashboard(self, request):
+      login = self.login_check(request)
+      if login != None:
+         return login
+
+      if self.authenticator.isInstructor(request.user):
+         return Response("You're a professor (%s)" % request.user)
+      else:
+         return Response("You're a student (%s)" % request.user)
+
+   # Returns None if logged in or request contains correct username/password
+   # combo. In the latter case, user is logged in. Otherwise, returns the
+   # login page with an error displayed.
+   def login_check(self, request):
+      # Authenticate if not already logged in.
       if not request.logged_in:
          form = request.form
          missing = missingParams(form, ['username', 'password'])
-         if missing != None:
-            return self.get_login('login.html')
-         username = form.get('username')
-         password = form.get('password')
-         if username in HACKY_DUMMY and HACKY_DUMMY[username] == password:
-            request.login(username)
-         else:
-            return self.get_login(request, True)
-
-      if request.logged_in:
-         return Response("Logged in as " + request.user)
-      else:
-         return self.get_login('login.html', True)
+         if missing == None:
+            #return self.get_login(request, True)
+            username = form.get('username')
+            password = form.get('password')
+            if self.authenticator.passwordMatches(username, password):
+               request.login(username)
+               return None
+         return self.get_login(request, True)
 
    def get_login(self, request, error=False):
       return self.render('login.html', error=error)
@@ -105,6 +108,7 @@ class PeerReviewService(object):
          Rule('/<all>', redirect_to='/dashboard'),
       ])
       self.store = RedisStore()
+      self.authenticator = Authenticator(self.store)
       self.jinja_env = Environment(loader=FileSystemLoader(template_path),
                                    autoescape=True)
 

@@ -2,10 +2,15 @@ from werkzeug.wrappers import Request
 from werkzeug.utils import cached_property
 from werkzeug.contrib.securecookie import SecureCookie
 
-# os.urandom(20)
+# Dummy. On setup, use something like os.urandom(20).
 SECRET_KEY = '\xd8W\xc4\x12s\x83\xf8F\x81\xa9\xb3}\xbb\x06H\xc5#\x8f\xc8C'
 COOKIE_NAME = 'session'
 USER_KEY = 'username'
+
+HACKY_DUMMY = {
+   'user': 'password',
+   'admin': 'lol'
+}
 
 """
 A request with a secure cookie session.
@@ -36,3 +41,16 @@ class SessionRequest(Request):
       if not data:
          return SecureCookie(secret_key=SECRET_KEY)
       return SecureCookie.unserialize(data, SECRET_KEY)
+
+class Authenticator(Request):
+   def __init__(self, store):
+      self.store = store
+
+   def isAssigned(self, username, assignment):
+      return True
+
+   def passwordMatches(self, username, password):
+      return username in HACKY_DUMMY and HACKY_DUMMY[username] == password
+
+   def isInstructor(self, username):
+      return username == 'admin'
