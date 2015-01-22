@@ -6,7 +6,7 @@ from werkzeug.utils import redirect
 from werkzeug.contrib.securecookie import SecureCookie
 from persistent import RedisStore, Answer
 from json import loads, dumps
-from session import SessionRequest, Authenticator
+from session import SessionRequest
 
 def missingParams(actual, required):
    notFound = filter(lambda p : not p in actual, required)
@@ -69,7 +69,7 @@ class PeerReviewService(object):
       if login != None:
          return login
 
-      if self.authenticator.isInstructor(request.user):
+      if self.store.isInstructor(request.user):
          return Response("You're a professor (%s)" % request.user)
       else:
          return Response("You're a student (%s)" % request.user)
@@ -86,7 +86,7 @@ class PeerReviewService(object):
             #return self.get_login(request, True)
             username = form.get('username')
             password = form.get('password')
-            if self.authenticator.passwordMatches(username, password):
+            if self.store.passwordMatches(username, password):
                request.login(username)
                return None
          return self.get_login(request, True)
@@ -108,7 +108,6 @@ class PeerReviewService(object):
          Rule('/<all>', redirect_to='/dashboard'),
       ])
       self.store = RedisStore()
-      self.authenticator = Authenticator(self.store)
       self.jinja_env = Environment(loader=FileSystemLoader(template_path),
                                    autoescape=True)
 

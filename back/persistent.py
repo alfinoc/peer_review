@@ -1,5 +1,7 @@
+from passlib.apps import custom_app_context as pwd_context
+from passlib.hash import sha256_crypt
 from bisect import bisect_left
-from json import loads
+from json import loads, dumps
 import redis
 
 HOST = 'localhost'
@@ -9,15 +11,25 @@ class StoreEntry:
    def __init__(self):
       self._serializable = []
 
-   def asDict(self):
+   def hash(self):
       res = {}
       for prop in self._serializable:
-         res[prop] = getattr(self, prop)
+         value = getattr(self, prop)
+         if type(value) == dict or type(value) == list:
+            value = dumps(value)
+         res[prop] = value
       return res
 
    def addSerialProperty(self, name, value):
       setattr(self, name, value)
       self._serializable.append(name)
+
+   # TODO: the getters below should ideally return a the storeentry subclasses
+   # below. this probably means adding IDs to storeentries when they're added,
+   # and also including the id in the store entry object on return
+   def fromHash(subclass, hash, id=None):
+      entry = subclass()
+      return entry
 
 class Course(StoreEntry):
    def __init__(self, title='Untitled', assignments=[], participants=[]):
@@ -27,10 +39,11 @@ class Course(StoreEntry):
       self.addSerialProperty('participants', participants)
 
 class Assignment(StoreEntry):
-   def __init__(self, title='Untitled', questions=[]):
+   def __init__(self, title='Untitled', questions=[], users=[]):
       StoreEntry.__init__(self)
       self.addSerialProperty('title', title)
       self.addSerialProperty('questions', questions)
+      self.addSerialProperty('assigned', users)
 
 class Question(StoreEntry):
    def __init__(self, prompt='Question Prompt'):
@@ -61,6 +74,29 @@ class RedisStore:
          self.store = redis.Redis(HOST, port=PORT)
       except redis.ConnectionError:
          raise IOError
+
+   def addUser(self, username, password, isInstructor=False, name='Anonymous', email=''):
+      passKey = _suffix(username, 'password')
+      if self.store.exists(passKey):
+         raise ValueError('User (%s) already exists.' % username)
+      self.store.set(passKey, sha256_crypt.encrypt(password))
+      self.store.hmset(_suffix(username, 'user'),  {
+         'name': name,
+         'email': email,
+         'instructor': isInstructor
+      })
+
+   def isInstructor(self, username):
+      return self.store.hget(_suffix(username, 'user'), 'instructor') == 'True'
+
+   def isStudent(self, username):
+      return not self.isInstructor(username)
+
+   def passwordMatches(self, username, password):
+      key = _suffix(username, 'password')
+      if self.store.exists(key):
+         return pwd_context.verify(password, self.store.get(key))
+      return False
 
    def addCourse(self, course):
       course_id = self._setEntry('course', course)
@@ -100,7 +136,7 @@ class RedisStore:
 
    def _setEntry(self, suffix, entry):
       nextId = self._getNewId(suffix)
-      self.store.hmset(_suffix(nextId, suffix), entry.asDict())
+      self.store.hmset(_suffix(nextId, suffix), entry.hash())
       return nextId
 
    def _getNewId(self, suffix):
