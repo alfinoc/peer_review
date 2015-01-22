@@ -1,70 +1,14 @@
 from passlib.apps import custom_app_context as pwd_context
 from passlib.hash import sha256_crypt
 from bisect import bisect_left
-from json import loads, dumps
+from json import loads
 import redis
+
+from model import Course, Assignment, Question, Answer
 
 HOST = 'localhost'
 PORT = '6379'
 
-class StoreEntry:
-   def __init__(self):
-      self._serializable = []
-
-   def hash(self):
-      res = {}
-      for prop in self._serializable:
-         value = getattr(self, prop)
-         if type(value) == dict or type(value) == list:
-            value = dumps(value)
-         res[prop] = value
-      return res
-
-   def addSerialProperty(self, name, value):
-      setattr(self, name, value)
-      self._serializable.append(name)
-
-   # TODO: the getters below should ideally return a the storeentry subclasses
-   # below. this probably means adding IDs to storeentries when they're added,
-   # and also including the id in the store entry object on return
-   def fromHash(subclass, hash, id=None):
-      entry = subclass()
-      return entry
-
-class Course(StoreEntry):
-   def __init__(self, title='Untitled', assignments=[], participants=[]):
-      StoreEntry.__init__(self)
-      self.addSerialProperty('title', title)
-      self.addSerialProperty('assignments', assignments)
-      self.addSerialProperty('participants', participants)
-
-class Assignment(StoreEntry):
-   def __init__(self, title='Untitled', questions=[], users=[]):
-      StoreEntry.__init__(self)
-      self.addSerialProperty('title', title)
-      self.addSerialProperty('questions', questions)
-      self.addSerialProperty('assigned', users)
-
-class Question(StoreEntry):
-   def __init__(self, prompt='Question Prompt'):
-      StoreEntry.__init__(self)
-      self.addSerialProperty('prompt', prompt)
-      self.addSerialProperty('answers', [])
-
-class Answer(StoreEntry):
-   def __init__(self, text='', value=None):
-      StoreEntry.__init__(self)
-      self.addSerialProperty('text', text)
-      self.addSerialProperty('value', value)
-
-"""
-Key scheme:
-   all_courses -> list(id)
-   <id>:course -> CourseHash
-   <id>:asst -> AssignmentHash
-   <id>:quest -> QuestionHash
-   <id>:answer -> AnswerHash
-"""
 def _suffix(s, suffix):
    return str(s) + ':' + str(suffix)
 
@@ -85,6 +29,7 @@ class RedisStore:
          'email': email,
          'instructor': isInstructor
       })
+      # TODO: make password a key in this hash
 
    def isInstructor(self, username):
       return self.store.hget(_suffix(username, 'user'), 'instructor') == 'True'
@@ -101,48 +46,61 @@ class RedisStore:
    def addCourse(self, course):
       course_id = self._setEntry('course', course)
       self.store.rpush('all_courses', course_id)
-      return course_id
+      course.setId(course_id)
 
-   def addAssignment(self, course_id, assignment):
-      newAsst = self._setEntry('asst', assignment)
-      self._pushToHashList(_suffix(course_id, 'course'), 'assignments', newAsst)
-      return newAsst
+   def addAssignment(self, course, assignment):
+      self._registerEntry(course, assignment, 'assignments')
 
-   def addQuestion(self, assignment_id, question):
-      newQuestion = self._setEntry('quest', question)
-      self._pushToHashList(_suffix(assignment_id, 'asst'), 'questions', newQuestion)
-      return newQuestion
+   def addQuestion(self, assignment, question):
+      self._registerEntry(assignment, question, 'questions')
 
-   def addAnswer(self, question_id, answer):
-      newAnswer = self._setEntry('answer', answer)
-      self._pushToHashList(_suffix(question_id, 'quest'), 'answers', newAnswer)
-      return newAnswer
+   def addAnswer(self, question, answer):
+      self._registerEntry(question, answer, 'answers')
 
-   def getCourse(self, course_id):
-      return self._getEntry(course_id, 'course')
+   def getCourse(self, id):
+      return self._getEntry(Course, id)
 
-   def getAssignment(self, assignment_id):
-      return self._getEntry(assignment_id, 'asst')
+   def getAssignment(self, id):
+      return self._getEntry(Assignment, id)
 
-   def getQuestion(self, question_id):
-      return self._getEntry(question_id, 'quest')
+   def getQuestion(self, id):
+      return self._getEntry(Question, id)
 
-   def getAnswer(self, answer_id):
-      return self._getEntry(answer_id, 'answer')
+   def getAnswer(self, id):
+      return self._getEntry(Answer, id)
 
-   def _getEntry(self, id, suffix):
-      hashValue = self.store.hgetall(_suffix(id, suffix))
-      return hashValue if len(hashValue) != 0 else None
+   def _getEntry(self, constructor, id):
+      entry = constructor()
+      entry.setId(id)
+      hash = self.store.hgetall(entry.key())
+      if len(hash) != 0:
+         entry.loadHash(hash)
+         return entry
+      else:
+         return None
 
    def _setEntry(self, suffix, entry):
       nextId = self._getNewId(suffix)
       self.store.hmset(_suffix(nextId, suffix), entry.hash())
       return nextId
 
-   def _getNewId(self, suffix):
-      return self.store.incr(_suffix('last_term_id', suffix))
+   # Stores both entries if they aren't stored already, and pushes childEntry's id
+   # to the list in parentEntry's hash keyed on parentListKey.
+   def _registerEntry(self, parentEntry, childEntry, parentListKey):
+      if parentEntry.getId() == None:
+         raise ValueError('Parent entry (%s) not stored.' % str(type(parentEntry)))
+      if childEntry.getId() == None:
+         self._storeEntry(childEntry)
+      self._pushToHashList(parentEntry.key(), parentListKey, childEntry.getId())
+
+   def _storeEntry(self, entry):
+      entry.setId(self._getNewId(entry.suffix()))
+      self.store.hmset(entry.key(), entry.hash())
 
    def _pushToHashList(self, hashKey, listKey, value):
       prev = loads(self.store.hget(hashKey, listKey))
       prev.append(value)
       self.store.hset(hashKey, listKey, prev)
+
+   def _getNewId(self, suffix):
+      return self.store.incr(_suffix('last_term_id', suffix))
