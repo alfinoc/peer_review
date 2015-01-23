@@ -32,9 +32,10 @@ class PeerReviewService(object):
          value = args[questionKey].strip()
          if value == '':
             continue
-         if self.store.getQuestion(questionKey) == None:
+         question = self.store.getQuestion(questionKey)
+         if question == None:
             return BadRequest('Question with id {0} not defined.'.format(questionKey))
-         self.store.addAnswer(questionKey, Answer(value))
+         self.store.addAnswer(question, Answer(value))
       return Response('Successfully recorded responses.')
 
    def get_survey(self, request):
@@ -83,7 +84,7 @@ class PeerReviewService(object):
          form = request.form
          missing = missingParams(form, ['username', 'password'])
          if missing == None:
-            #return self.get_login(request, True)
+            request.logout()
             username = form.get('username')
             password = form.get('password')
             if self.store.passwordMatches(username, password):

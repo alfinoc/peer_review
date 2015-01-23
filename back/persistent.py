@@ -20,16 +20,15 @@ class RedisStore:
          raise IOError
 
    def addUser(self, username, password, isInstructor=False, name='Anonymous', email=''):
-      passKey = _suffix(username, 'password')
-      if self.store.exists(passKey):
+      key = _suffix(username, 'user')
+      if self.store.exists(key):
          raise ValueError('User (%s) already exists.' % username)
-      self.store.set(passKey, sha256_crypt.encrypt(password))
-      self.store.hmset(_suffix(username, 'user'),  {
+      self.store.hmset(key,  {
          'name': name,
          'email': email,
-         'instructor': isInstructor
+         'instructor': isInstructor,
+         'password': sha256_crypt.encrypt(password)
       })
-      # TODO: make password a key in this hash
 
    def isInstructor(self, username):
       return self.store.hget(_suffix(username, 'user'), 'instructor') == 'True'
@@ -38,9 +37,9 @@ class RedisStore:
       return not self.isInstructor(username)
 
    def passwordMatches(self, username, password):
-      key = _suffix(username, 'password')
+      key = _suffix(username, 'user')
       if self.store.exists(key):
-         return pwd_context.verify(password, self.store.get(key))
+         return pwd_context.verify(password, self.store.hget(key, 'password'))
       return False
 
    def addCourse(self, course):
