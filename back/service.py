@@ -71,7 +71,8 @@ class PeerReviewService(object):
          return login
 
       if self.store.isInstructor(request.user):
-         return Response("You're a professor (%s)" % request.user)
+         return self.render('prof_dashboard.html')
+         #return Response("You're a professor (%s)" % request.user)
       else:
          return Response("You're a student (%s)" % request.user)
 

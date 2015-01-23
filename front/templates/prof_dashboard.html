@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title></title>
+   <!-- Statically loaded extern file. -->
+   <script src="components/standard/webcomponentsjs/webcomponents.js"></script>
+   <link rel="stylesheet" type="text/css" href="global/main.css">
+   <link rel="stylesheet" type="text/css" href="global/dashboard.css">
+   <link rel="import" href="components/standard/polymer/polymer.html">
+   <link rel="import" href="components/controllers/prof-dashboard.html">
+   <link rel="import" href="components/dash-card/dash-card.html">
+   <link rel="import" href="components/standard/paper-icon-button/paper-icon-button.html">
+   <link rel="import" href="components/standard/paper-fab/paper-fab.html">
+
+</head>
+<body>
+   <prof-dashboard>
+      <dash-card title="Assignments">
+         <paper-fab class="headerbutton" icon="add" mini></paper-fab>
+      </dash-card>
+      <dash-card title="Courses">
+         <paper-fab class="headerbutton" icon="add" mini></paper-fab>
+      </dash-card>
+      <dash-card title="Data">
+         <paper-fab class="headerbutton" icon="arrow-forward" mini></paper-fab>
+      </dash-card>
+   </prof-dashboard>
+</body>
+</html>

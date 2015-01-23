@@ -1,0 +1,61 @@
+<link rel="import" href="/components/standard/core-ajax/core-ajax.html">
+<link rel="import" href="/components/standard/paper-button/paper-button.html">
+<link rel="import" href="/components/standard/paper-toast/paper-toast.html">
+
+<polymer-element name="prof-dashboard">
+   <template>
+      <link rel="stylesheet" type="text/css" href="/components/controllers/prof-dashboard.css">
+      <style>
+:host {
+   width: 700px !important;
+   display: block;
+   margin: auto;
+}
+
+polyfill-next-selector { content: 'dash-card'; }
+::content dash-card:nth-child(1) {
+   background-color: #BBDEFB;
+}
+
+polyfill-next-selector { content: 'dash-card:nth-child(1)::shadow h1'; }
+::content dash-card:nth-child(1)::shadow h1 {
+   color: #2196F3;
+   background-color: #2196F3;
+}
+
+polyfill-next-selector { content: 'dash-card'; }
+::content dash-card:nth-child(2) {
+   background-color: #B2DFDB;
+}
+
+polyfill-next-selector { content: 'dash-card:nth-child(1)::shadow h1'; }
+::content dash-card:nth-child(2)::shadow h1 {
+   color: #009688;
+   background-color: #009688;
+}
+
+polyfill-next-selector { content: 'dash-card'; }
+::content dash-card:nth-child(3) {
+   background-color: #FFCDD2;
+}
+
+polyfill-next-selector { content: 'dash-card:nth-child(1)::shadow h1'; }
+::content dash-card:nth-child(3)::shadow h1 {
+   color: #F44336;
+   background-color: #F44336;
+}
+
+
+
+
+      </style>
+      <content></content>
+   </template>
+      <script>
+
+Polymer('prof-dashboard', {
+
+});
+
+   </script>
+</polymer-element>
