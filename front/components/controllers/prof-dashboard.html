@@ -1,48 +1,10 @@
-<link rel="import" href="/components/standard/core-ajax/core-ajax.html">
-<link rel="import" href="/components/standard/paper-button/paper-button.html">
-<link rel="import" href="/components/standard/paper-toast/paper-toast.html">
-<link rel="import" href="/components/standard/core-collapse/core-collapse.html">
-<link rel="import" href="/components/standard/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="/components/dash-card/assignment-card.html">
 
 <polymer-element name="prof-dashboard">
    <template>
       <link rel="stylesheet" type="text/css" href="/components/controllers/prof-dashboard.css">
       <div>
-         <dash-card title="Assignments">
-            <paper-fab class="headerbutton" icon="add" mini></paper-fab>
-            <ul class="toplevel">
-               <template repeat="{{ a in assignments }}">
-                  <li>
-                     <div on-click="{{ toggleCollapseSection }}">
-                        {{ a.name }}
-                     </div>
-                     <core-collapse>
-                        <ol>
-                           <template repeat="{{ q in a.questions }}">
-                              <li>{{ q }}</li>
-                           </template>
-                        </ol>
-                     </core-collapse>
-                  </li>
-               </template>
-            </ul>
-         </dash-card>
-         <dash-card title="Courses">
-            <paper-fab class="headerbutton" icon="add" mini></paper-fab>
-            <ul class="toplevel">
-               <template repeat="{{ c in courses }}">
-                  <li>
-                     <div on-click="{{ toggleCollapseSection }}">
-                        {{ c.shortname }}
-                        <span class="sub">{{ c.longname }}</span>
-                     </div>
-                  </li>
-               </template>
-            </ul>
-         </dash-card>
-         <dash-card title="Data">
-            <paper-fab class="headerbutton" icon="arrow-forward" mini></paper-fab>
-         </dash-card>
+         <assignment-card id="acard"></assignment-card>
       </div>
    </template>
       <script>
@@ -52,14 +14,17 @@ Polymer('prof-dashboard', {
       // Load model from light DOM.
       this.courses = this.gather('course', ['shortname', 'longname']);
       this.students = this.gather('student', ['name']);
-      this.assignments = this.gather('assignment', ['name']);
-      this.assignments.forEach(function(asst) {
+      var assignments = this.gather('assignment', ['name']);
+      assignments.forEach(function(asst) {
          var elt = asst['element'];
          var questions = elt.querySelectorAll('question').array();
          asst['questions'] = questions.map(function(question) {
             return question.innerHTML;
          });
       });
+
+      // Populate card models.
+      this.$.acard.assignments = assignments;
    },
 
    gather: function(tagName, attributes) {
@@ -72,10 +37,6 @@ Polymer('prof-dashboard', {
          obj['element'] = elt;
          return obj;
       });
-   },
-
-   toggleCollapseSection: function(evt) {
-      evt.target.parentElement.querySelector('core-collapse').toggle();
    }
 });
 
