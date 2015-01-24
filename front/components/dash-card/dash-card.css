@@ -71,6 +71,11 @@ paper-radio-button::shadow #ink[checked] {
   color: #424242;
 }
 
+paper-radio-button[checked]::shadow #offRadio,
+paper-radio-button::shadow #offRadio {
+  border-color: #424242;
+}
+
 #edit {
    position: absolute;
    top: 0px;
@@ -85,6 +90,4 @@ paper-radio-button::shadow #ink[checked] {
 .hide {
    display: none;
 }
-
-
 

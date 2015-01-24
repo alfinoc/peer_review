@@ -8,19 +8,22 @@
 
 <link rel="import" href="/components/standard/core-icons/editor-icons.html">
 
+<link rel="import" href="/components/standard/paper-dialog/paper-dialog.html">
+
+
 <polymer-element name="assignment-card">
    <template>
       <link rel="stylesheet" type="text/css" href="dash-card.css">
       <h1 layout horizontal>
          <span flex self-center>Assignments</span>
-         <paper-fab class="headerbutton" icon="add" mini></paper-fab>
+         <paper-fab class="headerbutton" icon="add" mini on-click="{{ addAssignment }}"></paper-fab>
       </h1>
       <div class="content">
          <ul class="toplevel">
             <template repeat="{{ a in assignments }}">
                <li>
                   <div layout horizontal>
-                     <paper-icon-button id="edit" icon="editor:mode-edit"></paper-icon-button>
+                     <paper-icon-button id="edit" class="hide" icon="editor:mode-edit" on-click="{{ editAssignment }}"></paper-icon-button>
                      <div class="clickable" on-click="{{ toggleCollapseSection }}" flex self-center>
                         {{ a.name }}
                      </div>
@@ -30,16 +33,24 @@
                         <paper-radio-button name="feedback"></paper-radio-button>
                      </paper-radio-group>
                   </div>
-                  <core-collapse opened>
-                     <ol>
-                        <template repeat="{{ q in a.questions }}">
-                           <li>{{ q }}</li>
-                        </template>
-                     </ol>
+                  <core-collapse>
+                     <template if="{{ a.questions && a.questions.length > 0 }}">
+                        <ol>
+                           <template repeat="{{ q in a.questions }}">
+                              <li>{{ q }}</li>
+                           </template>
+                        </ol>
+                     </template>
                   </core-collapse>
+                  <paper-dialog backdrop class="editor" heading="Edit Assignment">
+                     form editor
+                  </paper-dialog>
                </li>
             </template>
          </ul>
+         <paper-dialog backdrop id="add" heading="Add Assignment">
+            form editor
+         </paper-dialog>
       </div>
    </template>
       <script>
@@ -62,6 +73,16 @@ Polymer('assignment-card', {
          editButton.classList.remove('hide');
       else
          editButton.classList.add('hide');
+   },
+
+   addAssignment: function() {
+      this.$.add.toggle();
+   },
+
+   editAssignment: function(evt) {
+      var ancestor = evt.target.parentElement.parentElement;
+      var editor = ancestor.querySelector('paper-dialog.editor');
+      editor.toggle();
    }
 });
 
