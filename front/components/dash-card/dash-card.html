@@ -8,6 +8,7 @@
    margin-top: 10px;
    border-radius: 2px;
    overflow: hidden;
+   font-size: larger;
 }
 
 h1 {
@@ -22,24 +23,16 @@ h1 span {
    color: white;
 }
 
-.content {
-   padding: 20px;
-}
-
 ::content paper-fab {
    background-color: white;
    color: inherit;
 }
-
       </style>
       <h1 layout horizontal>
          <span flex self-center>{{ title }}</span>
          <content select=".headerbutton"></content>
       </h1>
-      <div class="content">
-         lol
-         
-      </div>
+      <div class="content"><content></content></div>
    </template>
       <script>
 
@@ -47,7 +40,6 @@ Polymer('dash-card', {
    publish: {
       'title': ''
    }
-
 });
 
    </script>

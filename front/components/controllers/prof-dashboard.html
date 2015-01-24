@@ -1,60 +1,82 @@
 <link rel="import" href="/components/standard/core-ajax/core-ajax.html">
 <link rel="import" href="/components/standard/paper-button/paper-button.html">
 <link rel="import" href="/components/standard/paper-toast/paper-toast.html">
+<link rel="import" href="/components/standard/core-collapse/core-collapse.html">
+<link rel="import" href="/components/standard/paper-checkbox/paper-checkbox.html">
 
 <polymer-element name="prof-dashboard">
    <template>
       <link rel="stylesheet" type="text/css" href="/components/controllers/prof-dashboard.css">
-      <style>
-:host {
-   width: 700px !important;
-   display: block;
-   margin: auto;
-}
-
-polyfill-next-selector { content: 'dash-card'; }
-::content dash-card:nth-child(1) {
-   background-color: #BBDEFB;
-}
-
-polyfill-next-selector { content: 'dash-card:nth-child(1)::shadow h1'; }
-::content dash-card:nth-child(1)::shadow h1 {
-   color: #2196F3;
-   background-color: #2196F3;
-}
-
-polyfill-next-selector { content: 'dash-card'; }
-::content dash-card:nth-child(2) {
-   background-color: #B2DFDB;
-}
-
-polyfill-next-selector { content: 'dash-card:nth-child(1)::shadow h1'; }
-::content dash-card:nth-child(2)::shadow h1 {
-   color: #009688;
-   background-color: #009688;
-}
-
-polyfill-next-selector { content: 'dash-card'; }
-::content dash-card:nth-child(3) {
-   background-color: #FFCDD2;
-}
-
-polyfill-next-selector { content: 'dash-card:nth-child(1)::shadow h1'; }
-::content dash-card:nth-child(3)::shadow h1 {
-   color: #F44336;
-   background-color: #F44336;
-}
-
-
-
-
-      </style>
-      <content></content>
+      <div>
+         <dash-card title="Assignments">
+            <paper-fab class="headerbutton" icon="add" mini></paper-fab>
+            <ul class="toplevel">
+               <template repeat="{{ a in assignments }}">
+                  <li>
+                     <div on-click="{{ toggleCollapseSection }}">
+                        {{ a.name }}
+                     </div>
+                     <core-collapse>
+                        <ol>
+                           <template repeat="{{ q in a.questions }}">
+                              <li>{{ q }}</li>
+                           </template>
+                        </ol>
+                     </core-collapse>
+                  </li>
+               </template>
+            </ul>
+         </dash-card>
+         <dash-card title="Courses">
+            <paper-fab class="headerbutton" icon="add" mini></paper-fab>
+            <ul class="toplevel">
+               <template repeat="{{ c in courses }}">
+                  <li>
+                     <div on-click="{{ toggleCollapseSection }}">
+                        {{ c.shortname }}
+                        <span class="sub">{{ c.longname }}</span>
+                     </div>
+                  </li>
+               </template>
+            </ul>
+         </dash-card>
+         <dash-card title="Data">
+            <paper-fab class="headerbutton" icon="arrow-forward" mini></paper-fab>
+         </dash-card>
+      </div>
    </template>
       <script>
 
 Polymer('prof-dashboard', {
+   domReady: function() {
+      // Load model from light DOM.
+      this.courses = this.gather('course', ['shortname', 'longname']);
+      this.students = this.gather('student', ['name']);
+      this.assignments = this.gather('assignment', ['name']);
+      this.assignments.forEach(function(asst) {
+         var elt = asst['element'];
+         var questions = elt.querySelectorAll('question').array();
+         asst['questions'] = questions.map(function(question) {
+            return question.innerHTML;
+         });
+      });
+   },
 
+   gather: function(tagName, attributes) {
+      var elts = document.querySelectorAll(tagName).array();
+      return elts.map(function(elt) {
+         var obj = {};
+         attributes.forEach(function(attr) {
+            obj[attr] = elt.getAttribute(attr);
+         });
+         obj['element'] = elt;
+         return obj;
+      });
+   },
+
+   toggleCollapseSection: function(evt) {
+      evt.target.parentElement.querySelector('core-collapse').toggle();
+   }
 });
 
    </script>
