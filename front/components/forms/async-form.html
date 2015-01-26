@@ -1,0 +1,56 @@
+<link rel="import" href="/components/standard/paper-toast/paper-toast.html">
+<link rel="import" href="/components/standard/core-ajax/core-ajax.html">
+<link rel="import" href="/components/forms/question-input.html">
+<link rel="import" href="/components/standard/paper-icon-button/paper-icon-button.html">
+
+<polymer-element name="async-form">
+   <template>
+      <link rel="stylesheet" type="text/css" href="async-form.css">
+      <core-ajax id="ajax"></core-ajax>
+      <div>
+         <template repeat="{{ i in range(numInputs) }}">
+            <question-input number="{{ i }}" defaultText="{{ defaultText }}"></question-input>
+         </template>
+      </div>
+      <template if="{{ auto }}">
+         <div class="buttonbar" layout horizontal>
+            <div flex></div>
+            <paper-icon-button icon="remove" on-click="{{ removeInput }}"></paper-icon-button>
+            <paper-icon-button icon="add" on-click="{{ addInput }}"></paper-icon-button>
+         </div>
+      </template>
+   </template>
+      <script>
+
+Polymer('async-form', {
+   publish: {
+      numInputs: 1,
+      auto: false,
+      defaultText: ''
+   },
+
+   submit: function() {
+
+   },
+
+   range: function(max) {
+      var res = [];
+      for (var i = 1; i <= max; i++) res.push(i);
+      return res;
+   },
+
+   addInput: function() {
+      this.numInputs++;
+      // TODO: scroll to bottom. probably need to fire an event up to the paper-dialog
+   },
+
+   removeInput: function() {
+      var inputs = this.querySelectorAll('::shadow question-input');
+      if (inputs.length > 0 && !(inputs[inputs.length - 1].getResponse())) {
+         this.numInputs--;
+      }
+   }
+});
+
+   </script>
+</polymer-element>

@@ -1,13 +1,13 @@
-<link rel="import" href="/components/standard/paper-slider/paper-slider.html">
-
 <polymer-element name="question-input">
    <template>
       <link rel="stylesheet" type="text/css" href="/components/forms/question-input.css">
       <div layout horizontal>
          <div class="number">#{{ number }}</div>
          <div class="container" flex>
-            <div class="prompt">{{ prompt }}</div>
-            <textarea id="response" placeholder="your response"></textarea>
+            <template if="{{ prompt }}">
+               <div class="prompt">{{ prompt }}</div>
+            </template>
+            <textarea id="response" placeholder="{{ defaultText }}"></textarea>
          </div>
       </div>
    </template>
@@ -17,11 +17,12 @@ Polymer('question-input', {
    publish: {
       number: null,
       prompt: '',
-      key: null
+      key: null,
+      defaultText: 'your response'
    },
 
    getResponse: function() {
-      return this.$.response.value;
+      return this.$.response.value.trim();
    }
 });
 

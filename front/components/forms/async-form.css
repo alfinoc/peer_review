@@ -1,0 +1,19 @@
+:host {
+   height: 100%;
+}
+
+question-input::shadow #response {
+   min-height: 100px;
+}
+
+question-input:nth-child(odd) {
+   background-color: #EEE;
+}
+
+question-input {
+   padding: 0px;
+}
+
+.buttonbar {
+   padding: 10px;
+}

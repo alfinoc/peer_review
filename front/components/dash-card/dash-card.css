@@ -59,7 +59,7 @@ ul {
 
 ul.toplevel > li > div {
    padding-left: 20px;
-   padding-right: 20px;
+   padding-right: 5px;
    position: relative;
 }
 
