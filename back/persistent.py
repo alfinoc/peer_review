@@ -43,9 +43,8 @@ class RedisStore:
       return False
 
    def addCourse(self, course):
-      course_id = self._setEntry('course', course)
-      self.store.rpush('all_courses', course_id)
-      course.setId(course_id)
+      self._addNewEntry(course)
+      self.store.rpush('all_courses', course.getId())
 
    def addAssignment(self, course, assignment):
       self._registerEntry(course, assignment, 'assignments')
@@ -78,33 +77,49 @@ class RedisStore:
       else:
          return None
 
-   def _setEntry(self, suffix, entry):
-      nextId = self._getNewId(suffix)
-      self.store.hmset(_suffix(nextId, suffix), entry.hash())
-      return nextId
-
    # Stores both entries if they aren't stored already, and pushes childEntry's id
    # to the list in parentEntry's hash keyed on parentListKey.
    def _registerEntry(self, parentEntry, childEntry, parentListKey):
       if parentEntry.getId() == None:
-         raise ValueError('Parent entry (%s) not stored.' % str(type(parentEntry)))
-      #if childEntry.getId() == None:
+         raise ValueError('Parent entry (%s) not stored.' % str(type(parentEntry)))      
       self._storeEntry(childEntry)
-      childEntry.setParentKey(parentEntry.key())
-      self._pushToHashList(parentEntry.key(), parentListKey, childEntry.getId())
+      if childEntry.getId() == None:
+         childEntry.setParentKey(parentEntry.key())
+         self._pushToHashList(parentEntry.key(), parentListKey, childEntry.getId())
 
    def _storeEntry(self, entry):
-      # Record the current ID (the one to overwrite) as the predecessor of the
-      # current, then give the entry a new ID and store it.
-      if entry.getId() != None:
-         entry.setRevisionPredecessor(entry.getId())
-      entry.setId(self._getNewId(entry.suffix()))
-      self.store.hmset(entry.key(), entry.hash())
+      if entry.getId() == None:
+         self._addNewEntry(entry)
+      else:
+         # An entry with the current ID exists, so make a revision. Store
+         # the revision predecessor and guarantee that the current ID now
+         # refers to the new entry (argument).
+         if not self.store.exists(entry.key()):
+            raise ValueError('%s entry (%d) not stored.' % (r.suffix(), r.getId()))
+         suffix = entry.suffix()
+
+         # Generate a new ID setup for the currently stored version of entry.
+         newId = self._getNewId(suffix)
+         newKey = _suffix(newId, suffix)
+         entry.setRevisionPredecessor(newId)
+         newHash = entry.hash()
+
+         # Gather old ID setup to associate with entry.
+         oldId = entry.getId()
+         oldKey = entry.key();
+         oldHash = self.store.hgetall(oldKey)
+
+         self.store.hmset(oldKey, newHash)
+         self.store.hmset(newKey, oldHash)
 
    def _pushToHashList(self, hashKey, listKey, value):
       prev = loads(self.store.hget(hashKey, listKey))
       prev.append(value)
       self.store.hset(hashKey, listKey, prev)
+
+   def _addNewEntry(self, entry):
+      entry.setId(self._getNewId(entry.suffix()))
+      self.store.hmset(entry.key(), entry.hash())
 
    def _getNewId(self, suffix):
       return self.store.incr(_suffix('last_term_id', suffix))
