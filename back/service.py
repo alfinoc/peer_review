@@ -22,7 +22,7 @@ def subset(dict, keys):
    return res
 
 class PeerReviewService(object):
-   def get_respond_survey(self, request):
+   def get_submit_survey(self, request):
       args = request.form
       missing = missingParams(args, ['assignment'])
       if missing != None:
@@ -80,7 +80,6 @@ class PeerReviewService(object):
    # combo. In the latter case, user is logged in. Otherwise, returns the
    # login page with an error displayed.
    def login_check(self, request):
-      # Authenticate if not already logged in.
       if not request.logged_in:
          form = request.form
          missing = missingParams(form, ['username', 'password'])
@@ -92,6 +91,7 @@ class PeerReviewService(object):
                request.login(username)
                return None
          return self.get_login(request, True)
+      return None
 
    def get_login(self, request, error=False):
       return self.render('login.html', error=error)
@@ -102,7 +102,7 @@ class PeerReviewService(object):
 
    def __init__(self, template_path):
       self.url_map = Map([
-         Rule('/respond/survey', endpoint="respond_survey"),
+         Rule('/submit/survey', endpoint="submit_survey"),
          Rule('/dashboard', endpoint='dashboard'),
          Rule('/survey', endpoint='survey'),
          Rule('/logout', endpoint='logout'),

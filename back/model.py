@@ -8,6 +8,14 @@ class StoreEntry:
       self._serializable = []
       self.id = None
       self.typeKey = None
+      self.addSerialProperty('parent', None)
+      self.addSerialProperty('last', None)
+
+   def setParentKey(self, key):
+      self.parent = key
+
+   def setRevisionPredecessor(self, key):
+      self.last = key
 
    def hash(self):
       res = {}

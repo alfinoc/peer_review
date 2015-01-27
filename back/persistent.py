@@ -23,7 +23,7 @@ class RedisStore:
       key = _suffix(username, 'user')
       if self.store.exists(key):
          raise ValueError('User (%s) already exists.' % username)
-      self.store.hmset(key,  {
+      self.store.hmset(key, {
          'name': name,
          'email': email,
          'instructor': isInstructor,
@@ -88,11 +88,16 @@ class RedisStore:
    def _registerEntry(self, parentEntry, childEntry, parentListKey):
       if parentEntry.getId() == None:
          raise ValueError('Parent entry (%s) not stored.' % str(type(parentEntry)))
-      if childEntry.getId() == None:
-         self._storeEntry(childEntry)
+      #if childEntry.getId() == None:
+      self._storeEntry(childEntry)
+      childEntry.setParentKey(parentEntry.key())
       self._pushToHashList(parentEntry.key(), parentListKey, childEntry.getId())
 
    def _storeEntry(self, entry):
+      # Record the current ID (the one to overwrite) as the predecessor of the
+      # current, then give the entry a new ID and store it.
+      if entry.getId() != None:
+         entry.setRevisionPredecessor(entry.getId())
       entry.setId(self._getNewId(entry.suffix()))
       self.store.hmset(entry.key(), entry.hash())
 
