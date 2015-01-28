@@ -7,7 +7,7 @@
             <template if="{{ prompt }}">
                <div class="prompt">{{ prompt }}</div>
             </template>
-            <textarea id="response" placeholder="{{ defaultText }}"></textarea>
+            <textarea id="response" placeholder="{{ placeholderText }}">{{ defaultText }}</textarea>
          </div>
       </div>
    </template>
@@ -18,7 +18,8 @@ Polymer('question-input', {
       number: null,
       prompt: '',
       key: null,
-      defaultText: 'your response'
+      placeholderText: 'your response',
+      defaultText: ''
    },
 
    getResponse: function() {

@@ -14,8 +14,8 @@ class StoreEntry:
    def setParentKey(self, key):
       self.parent = key
 
-   def setRevisionPredecessor(self, key):
-      self.last = key
+   def setRevisionPredecessor(self, id):
+      self.last = id
 
    def hash(self):
       res = {}

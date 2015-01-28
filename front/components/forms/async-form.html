@@ -7,26 +7,40 @@
    <template>
       <link rel="stylesheet" type="text/css" href="async-form.css">
       <core-ajax id="ajax"></core-ajax>
+      <div class="buttonbar" layout horizontal>
+            <h1 flex>{{ header }}</h1>
+            <template if="{{ auto }}">
+               <paper-icon-button icon="remove" on-click="{{ removeInput }}" self-center></paper-icon-button>
+               <paper-icon-button icon="add" on-click="{{ addInput }}" self-center></paper-icon-button>
+            </template>
+         </div>
       <div>
-         <template repeat="{{ i in range(numInputs) }}">
-            <question-input number="{{ i }}" defaultText="{{ defaultText }}"></question-input>
+         <template repeat="{{ text, i in prefill }}">
+            <question-input number="{{ i + 1 }}"
+                            placeholderText="{{ placeholderText }}"
+                            defaultText="{{ text }}">
+            </question-input>
+         </template>
+         <template repeat="{{ i in range(blankInputs) }}">
+            <question-input number="{{ i + prefill.length }}"
+                            placeholderText="{{ placeholderText }}">
+            </question-input>
          </template>
       </div>
-      <template if="{{ auto }}">
-         <div class="buttonbar" layout horizontal>
-            <div flex></div>
-            <paper-icon-button icon="remove" on-click="{{ removeInput }}"></paper-icon-button>
-            <paper-icon-button icon="add" on-click="{{ addInput }}"></paper-icon-button>
-         </div>
-      </template>
    </template>
       <script>
 
 Polymer('async-form', {
    publish: {
-      numInputs: 1,
+      header: 'Edit Form',
+      blankInputs: 0,
       auto: false,
-      defaultText: ''
+      placeholderText: '',
+      prefill: []
+   },
+
+   created: function() {
+      prefill = [];
    },
 
    submit: function() {
@@ -40,14 +54,16 @@ Polymer('async-form', {
    },
 
    addInput: function() {
-      this.numInputs++;
+      this.blankInputs++;
       // TODO: scroll to bottom. probably need to fire an event up to the paper-dialog
+      var inputs = this.querySelectorAll('::shadow question-input');
+      inputs[inputs.length - 1].scrollIntoView();
    },
 
    removeInput: function() {
       var inputs = this.querySelectorAll('::shadow question-input');
-      if (inputs.length > 0 && !(inputs[inputs.length - 1].getResponse())) {
-         this.numInputs--;
+      if (inputs.length > 1 && !(inputs[inputs.length - 1].getResponse())) {
+         this.blankInputs--;
       }
    }
 });

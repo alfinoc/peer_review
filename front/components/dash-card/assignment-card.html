@@ -5,6 +5,7 @@
 <link rel="import" href="/components/standard/paper-button/paper-button.html">
 <link rel="import" href="/components/standard/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="/components/standard/core-icons/editor-icons.html">
+<link rel="import" href="/components/standard/paper-dialog/paper-action-dialog.html">
 <link rel="import" href="/components/standard/paper-dialog/paper-dialog.html">
 <link rel="import" href="/components/forms/async-form.html">
 
@@ -39,15 +40,19 @@
                         </ol>
                      </template>
                   </core-collapse>
-                  <paper-dialog backdrop class="editor" heading="Edit Assignment">
-                     form editor
-                  </paper-dialog>
+                  <paper-action-dialog backdrop>
+                     <async-form auto header="Edit Assignment" placeholderText="enter a new question" prefill="{{ a.questions }}"></async-form>
+                     <paper-button dismissive>CANCEL</paper-button>
+                     <paper-button affirmative>SAVE</paper-button>
+                  </paper-action-dialog>
                </li>
             </template>
          </ul>
-         <paper-dialog backdrop id="add" heading="Add Assignment">
-            <async-form auto defaultText="enter a new question"></async-form>
-         </paper-dialog>
+         <paper-action-dialog backdrop id="add">
+            <async-form auto header="Add Assignment" blankInputs="3" placeholderText="enter a new question"></async-form>
+            <paper-button dismissive>CANCEL</paper-button>
+            <paper-button affirmative>SAVE</paper-button>
+         </paper-action-dialog>
       </div>
    </template>
       <script>
@@ -78,7 +83,7 @@ Polymer('assignment-card', {
 
    editAssignment: function(evt) {
       var ancestor = evt.target.parentElement.parentElement;
-      var editor = ancestor.querySelector('paper-dialog.editor');
+      var editor = ancestor.querySelector('paper-action-dialog');
       editor.toggle();
    }
 });
