@@ -5,7 +5,6 @@
 <link rel="import" href="/components/standard/paper-radio-group/paper-radio-group.html">
 <link rel="import" href="/components/standard/paper-button/paper-button.html">
 <link rel="import" href="/components/standard/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="/components/standard/core-ajax/editor-ajax.html">
 <link rel="import" href="/components/standard/paper-dialog/paper-action-dialog.html">
 <link rel="import" href="/components/standard/paper-dialog/paper-dialog.html">
 <link rel="import" href="/components/forms/async-form.html">
@@ -42,17 +41,21 @@
                      </template>
                   </core-collapse>
                   <paper-action-dialog backdrop>
-                     <async-form auto header="Edit Assignment" placeholderText="enter a new question" prefill="{{ a.questions }}"></async-form>
+                     <async-form auto header="Edit Assignment" prefill="{{ a.questions }}"
+                                      placeholderText="enter a new question" url="/survey/edit"
+                                      serialize="{{ questionToProto }}"></async-form>
                      <paper-button dismissive>CANCEL</paper-button>
-                     <paper-button affirmative>SAVE</paper-button>
+                     <paper-button affirmative on-click="{{ saveForm }}">SAVE</paper-button>
                   </paper-action-dialog>
                </li>
             </template>
          </ul>
          <paper-action-dialog backdrop id="add">
-            <async-form auto header="Add Assignment" blankInputs="3" placeholderText="enter a new question"></async-form>
+            <async-form auto header="Add Assignment" blankInputs="3" url="/survey/edit"
+                        placeholderText="enter a new question"
+                        serialize="{{ questionToProto }}"></async-form>
             <paper-button dismissive>CANCEL</paper-button>
-            <paper-button affirmative>SAVE</paper-button>
+            <paper-button affirmative on-click="{{ saveForm }}">SAVE</paper-button>
          </paper-action-dialog>
       </div>
    </template>
@@ -65,6 +68,12 @@ Polymer('assignment-card', {
 
    created: function() {
       this.assignments = [];
+   },
+
+   questionToProto: function(messages) {
+      return messages.map(function(prompt) {
+         return PROTO.getQuestionProto(null, prompt, null);
+      });
    },
 
    toggleCollapseSection: function(evt) {
@@ -86,6 +95,11 @@ Polymer('assignment-card', {
       var ancestor = evt.target.parentElement.parentElement;
       var editor = ancestor.querySelector('paper-action-dialog');
       editor.toggle();
+   },
+
+   saveForm: function(evt) {
+      var ancestor = evt.target.parentElement;
+      ancestor.querySelector('async-form').submit();
    }
 });
 

@@ -9,6 +9,8 @@ from json import loads, dumps
 from session import SessionRequest
 import validate
 
+import inspect
+
 def missingParams(actual, required):
    notFound = filter(lambda p : not p in actual, required)
    if len(notFound) > 0:
@@ -30,14 +32,14 @@ class PeerReviewService(object):
 
       # Validate
       args = request.form
-      missing = missingParams(args, ['data'])
+      missing = missingParams(args, ['protos'])
       if missing != None:
          return missing
       try:
-         proto = validate.tryJSONParse(args)
+         proto = validate.tryJSONParse(args['protos'])
          validate.validateAssignmentProto(proto)
-      except ValueError as e:
-         return BadRequest(e.strerror)
+      except ValueError, e:
+         return BadRequest(e)
 
       # If ID is stored in Assignment proto, adding will store a revision
       # of that assignment. Otherwise, a new assignment

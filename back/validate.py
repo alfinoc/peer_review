@@ -24,7 +24,7 @@ def _valuePair(actual, expected):
 
 def _validateProto(actual, proto):
    # Check type.
-   if (actual['type'] != proto['type']):
+   if actual['type'] != proto['type']:
       raise ValueError('Illegal proto type ' + valuePair(actual['type'], proto['type']))
    # Requisit store keys.
    for key in proto.hashKeys:
@@ -32,13 +32,13 @@ def _validateProto(actual, proto):
          raise ValueError('Missing proto key (%s)' % key)
 
 def validateQuestionProto(actual):
-   validateProto(actual, R_PROTO)
+   _validateProto(actual, R_PROTO)
 
 def validateQuestionProto(actual):
-   validateProto(actual, Q_PROTO)
+   _validateProto(actual, Q_PROTO)
 
 def validateAssignmentProto(actual):
-   validateProto(actual, A_PROTO)
+   _validateProto(actual, A_PROTO)
    for q in actual.quesitons:
       validateQuestionProto(q)
 
@@ -49,4 +49,4 @@ def tryJSONParse(s):
    try:
       return loads(s)
    except:
-      return ValueError('Illegal JSON')
+      raise ValueError('Illegal JSON')

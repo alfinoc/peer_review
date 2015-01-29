@@ -23,13 +23,14 @@
                             defaultText="{{ text }}">
             </question-input>
          </template>
+         <span></span> <!-- hack to get nth-child indexing to work with above -->
          <template repeat="{{ i in range(blankInputs) }}">
             <question-input number="{{ i + prefill.length }}"
                             placeholderText="{{ placeholderText }}">
             </question-input>
          </template>
       </div>
-      <core-ajax id="ajax" url="{{ url }}"></core-ajax>
+      <core-ajax id="ajax" url="{{ url }}" method="POST"></core-ajax>
    </template>
       <script>
 
@@ -47,12 +48,17 @@ Polymer('async-form', {
    created: function() {
       prefill = [];
 
-      // A function from list of question responses to sendable 'data' object.
-      this.toMessage = function(responses) { return {}; };
+      // A function from list of question responses to JSON-ready object.
+      // The object will be set as the sole 'data' field to outgoing AJAX
+      // requests.
+      this.serialize = function(responses) { return {}; };
    },
 
    submit: function() {
-      this.$.ajax.params = JSON.stringify(this.toMessage(this.getInputs()));
+      this.$.ajax.params = JSON.stringify({
+         protos: this.serialize(this.getInputs())
+      });
+      this.$.ajax.go();
    },
 
    range: function(max) {
