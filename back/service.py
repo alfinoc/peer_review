@@ -1,12 +1,13 @@
 from jinja2 import Environment, FileSystemLoader
 from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
-from werkzeug.exceptions import HTTPException, BadRequest
+from werkzeug.exceptions import HTTPException, BadRequest, Unauthorized
 from werkzeug.utils import redirect
 from werkzeug.contrib.securecookie import SecureCookie
 from persistent import RedisStore, Answer
 from json import loads, dumps
 from session import SessionRequest
+import validate
 
 def missingParams(actual, required):
    notFound = filter(lambda p : not p in actual, required)
@@ -22,7 +23,28 @@ def subset(dict, keys):
    return res
 
 class PeerReviewService(object):
-   def get_submit_survey(self, request):
+   def get_survey_edit(self, request):
+      # Authenticate
+      if not self.store.isInstructor(request.user):
+         return Unauthorized('Sign in as an instructor to edit surveys.')
+
+      # Validate
+      args = request.form
+      missing = missingParams(args, ['data'])
+      if missing != None:
+         return missing
+      try:
+         proto = validate.tryJSONParse(args)
+         validate.validateAssignmentProto(proto)
+      except ValueError as e:
+         return BadRequest(e.strerror)
+
+      # If ID is stored in Assignment proto, adding will store a revision
+      # of that assignment. Otherwise, a new assignment
+      # is stored.
+      self.store.addAssignment(Assignment().loadHash(proto.hash))
+
+   def get_survey_submit(self, request):
       args = request.form
       missing = missingParams(args, ['assignment'])
       if missing != None:
@@ -102,7 +124,8 @@ class PeerReviewService(object):
 
    def __init__(self, template_path):
       self.url_map = Map([
-         Rule('/submit/survey', endpoint="submit_survey"),
+         Rule('/survey/edit', endpoint="survey_edit"),
+         Rule('/survey/submit', endpoint="survey_submit"),
          Rule('/dashboard', endpoint='dashboard'),
          Rule('/survey', endpoint='survey'),
          Rule('/logout', endpoint='logout'),

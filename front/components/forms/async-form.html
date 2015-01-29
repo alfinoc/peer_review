@@ -10,8 +10,10 @@
       <div class="buttonbar" layout horizontal>
             <h1 flex>{{ header }}</h1>
             <template if="{{ auto }}">
-               <paper-icon-button icon="remove" on-click="{{ removeInput }}" self-center></paper-icon-button>
-               <paper-icon-button icon="add" on-click="{{ addInput }}" self-center></paper-icon-button>
+               <paper-icon-button icon="remove" on-click="{{ removeInput }}" self-center>
+               </paper-icon-button>
+               <paper-icon-button icon="add" on-click="{{ addInput }}" self-center>
+               </paper-icon-button>
             </template>
          </div>
       <div>
@@ -27,6 +29,7 @@
             </question-input>
          </template>
       </div>
+      <core-ajax id="ajax" url="{{ url }}"></core-ajax>
    </template>
       <script>
 
@@ -36,15 +39,20 @@ Polymer('async-form', {
       blankInputs: 0,
       auto: false,
       placeholderText: '',
-      prefill: []
+      prefill: [],
+      url: '/',
+      formId: null
    },
 
    created: function() {
       prefill = [];
+
+      // A function from list of question responses to sendable 'data' object.
+      this.toMessage = function(responses) { return {}; };
    },
 
    submit: function() {
-
+      this.$.ajax.params = JSON.stringify(this.toMessage(this.getInputs()));
    },
 
    range: function(max) {
@@ -55,16 +63,19 @@ Polymer('async-form', {
 
    addInput: function() {
       this.blankInputs++;
-      // TODO: scroll to bottom. probably need to fire an event up to the paper-dialog
-      var inputs = this.querySelectorAll('::shadow question-input');
+      var inputs = this.getInputs();
       inputs[inputs.length - 1].scrollIntoView();
    },
 
    removeInput: function() {
-      var inputs = this.querySelectorAll('::shadow question-input');
+      var inputs = this.getInputs();
       if (inputs.length > 1 && !(inputs[inputs.length - 1].getResponse())) {
          this.blankInputs--;
       }
+   },
+
+   getInputs: function() {
+      return this.querySelectorAll('::shadow question-input');
    }
 });
 
