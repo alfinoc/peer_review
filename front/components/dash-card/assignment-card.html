@@ -42,8 +42,8 @@
                   </core-collapse>
                   <paper-action-dialog backdrop>
                      <async-form auto header="Edit Assignment" prefill="{{ a.questions }}"
-                                      placeholderText="enter a new question" url="/survey/edit"
-                                      serialize="{{ questionToProto }}"></async-form>
+                                      placeholderText="enter a new question" url="/survey/edit">
+                     </async-form>
                      <paper-button dismissive>CANCEL</paper-button>
                      <paper-button affirmative on-click="{{ saveForm }}">SAVE</paper-button>
                   </paper-action-dialog>
@@ -52,8 +52,8 @@
          </ul>
          <paper-action-dialog backdrop id="add">
             <async-form auto header="Add Assignment" blankInputs="3" url="/survey/edit"
-                        placeholderText="enter a new question"
-                        serialize="{{ questionToProto }}"></async-form>
+                        placeholderText="enter a new question">
+            </async-form>
             <paper-button dismissive>CANCEL</paper-button>
             <paper-button affirmative on-click="{{ saveForm }}">SAVE</paper-button>
          </paper-action-dialog>
@@ -70,10 +70,17 @@ Polymer('assignment-card', {
       this.assignments = [];
    },
 
-   questionToProto: function(messages) {
-      return messages.map(function(prompt) {
+   domReady: function() {
+      var forms = this.querySelectorAll('::shadow async-form').array();
+      for (var i = 0; i < forms.length; i++)
+         forms[i].serialize = this.toAssignmentProto.bind(this);
+   },
+
+   toAssignmentProto: function(messages) {
+      var questions = messages.map(function(prompt) {
          return PROTO.getQuestionProto(null, prompt, null);
       });
+      return PROTO.getAssignmentProto(null, 'lol', questions);
    },
 
    toggleCollapseSection: function(evt) {

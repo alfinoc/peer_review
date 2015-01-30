@@ -10,7 +10,7 @@ Q_PROTO = {
 A_PROTO = {
    'type': 'assignment',
    'suffix': model.Assignment.typeSuffix,
-   'hashKeys': model.Question()._serializable
+   'hashKeys': model.Assignment()._serializable
 }
 
 R_PROTO = {
@@ -24,11 +24,16 @@ def _valuePair(actual, expected):
 
 def _validateProto(actual, proto):
    # Check type.
+   print actual
+   if not 'type' in actual:
+      raise ValueError('Required proto key: type')
+   if not 'hash' in actual:
+      raise ValueError('Required proto key: hash')
    if actual['type'] != proto['type']:
       raise ValueError('Illegal proto type ' + valuePair(actual['type'], proto['type']))
    # Requisit store keys.
-   for key in proto.hashKeys:
-      if (not key in proto):
+   for key in proto['hashKeys']:
+      if (not key in actual['hash']):
          raise ValueError('Missing proto key (%s)' % key)
 
 def validateQuestionProto(actual):

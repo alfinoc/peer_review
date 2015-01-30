@@ -1,27 +1,27 @@
 window.PROTO = {};
 
-window.PROTO.getQuestionProto = function(id, prompt, answers) {
+window.PROTO.getQuestionProto = function(id, parent, prompt, answers) {
    prompt = prompt || 'New Prompt';
    answers = answers || [];
    var res = {
       type: 'question',
       hash: {
          prompt: prompt,
-         answers: []
+         answers: answers
       }
    };
    if (id) res['id'] = id;
    return res;
 };
 
-window.PROTO.getAssignmentProto = function(id, title, questions) {
+window.PROTO.getAssignmentProto = function(id, parent, title, questions) {
    title = title || 'Untitled';
    questions = questions || [];
    var res = {
-      type: 'question',
+      type: 'assignment',
       hash: {
          title: title,
-         questions: []
+         questions: questions
       }
    };
    if (id) res['id'] = id;

@@ -41,8 +41,7 @@ Polymer('async-form', {
       auto: false,
       placeholderText: '',
       prefill: [],
-      url: '/',
-      formId: null
+      url: '/'
    },
 
    created: function() {
@@ -55,10 +54,17 @@ Polymer('async-form', {
    },
 
    submit: function() {
-      this.$.ajax.params = JSON.stringify({
-         protos: this.serialize(this.getInputs())
+      var responses = this.getInputs().map(function(input) {
+         return input.getResponse();
+      });
+      this.$.ajax.body = JSON.stringify({
+         proto: this.serialize(responses),
       });
       this.$.ajax.go();
+   },
+
+   jsonString: function(obj) {
+      return JSON.stringify(obj);
    },
 
    range: function(max) {
@@ -81,7 +87,7 @@ Polymer('async-form', {
    },
 
    getInputs: function() {
-      return this.querySelectorAll('::shadow question-input');
+      return this.querySelectorAll('::shadow question-input').array();
    }
 });
 

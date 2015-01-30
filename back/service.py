@@ -31,12 +31,12 @@ class PeerReviewService(object):
          return Unauthorized('Sign in as an instructor to edit surveys.')
 
       # Validate
-      args = request.form
-      missing = missingParams(args, ['protos'])
-      if missing != None:
-         return missing
+      if len(request.form.keys()) == 0:
+         return BadRequest('Include POST body.')
       try:
-         proto = validate.tryJSONParse(args['protos'])
+         # TODO: Maybe fix this post body hack.
+         proto = request.form.keys()[0]
+         proto = validate.tryJSONParse(proto)['proto']
          validate.validateAssignmentProto(proto)
       except ValueError, e:
          return BadRequest(e)
@@ -45,6 +45,7 @@ class PeerReviewService(object):
       # of that assignment. Otherwise, a new assignment
       # is stored.
       self.store.addAssignment(Assignment().loadHash(proto.hash))
+      return Response('huh')
 
    def get_survey_submit(self, request):
       args = request.form
