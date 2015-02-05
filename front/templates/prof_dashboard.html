@@ -12,17 +12,13 @@
 </head>
 <body>
    <prof-dashboard>
-      <assignment name="Assignment #7">
-         <question>What is your favorite color?</question>
-         <question>Are you going to school?</question>
-         <question>Are you happy with your life?</question>
-      </assignment>
-      <assignment name="Reading Response #2">
-         <question>What is your favorite color?</question>
-         <question>Are you going to school?</question>
-         <question>Are you happy with your life?</question>
-      </assignment>
-      <assignment name="Reading Response #1" />
+      {% for a in assignments %}
+         <assignment name="{{ a.title }}">
+            {% for q in a.questions %}
+               <question>{{ q.prompt }}</question>
+            {% endfor %}
+         </assignment>
+      {% endfor %}
       <student name="Chris Alfino" username="alfino27" />
       <student name="Nick Alfino" username="bro" />
       <student name="Michele Pajer" username="mom" />

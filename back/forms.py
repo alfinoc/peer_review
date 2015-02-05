@@ -12,11 +12,11 @@ def jsonList(form, json):
       raise ValidationError('JSON object must be a list.')
 
 class EditAssignmentForm(Form):
-   asst_id = IntegerField('asst_id')
-   title = StringField('title')
-   questions = StringField('questions', validators=[jsonList])
+   asst_id = IntegerField('Assignment ID')
+   title = StringField('Assignment Title')
+   questions = StringField('Question List', validators=[jsonList])
 
-   def entry(self, store):
+   def entry(self):
       id = self.asst_id.data
       title = self.title.data
       questions = loads(self.questions.data)

@@ -33,10 +33,11 @@ class PeerReviewService(object):
       # Validate
       if request.method == 'POST':
          form = forms.EditAssignmentForm(request.form)
-         if not form.validate():
-            return BadRequest(form.errors);
+         print request.form
+         #if not form.validate():
+         #   return BadRequest(form.errors);
          assignment = form.entry()
-         if assignment.id() != None and not assignment.key() in self.store:
+         if assignment.getId() != None and not assignment.key() in self.store:
             return BadRequest('Unknown assignment key ' + assignment.key())
       else:
          return BadRequest('POST request required')
@@ -45,8 +46,8 @@ class PeerReviewService(object):
 
       # If ID is stored in Assignment proto, adding will store a revision
       # of that assignment. Otherwise, a new assignment is stored.
-      self.store.addAssignment(assignment)
-      return Response('Successfully updated assignment ' + assignment.id())
+      self.store.addAssignment(self.store.getCourse(1), assignment)
+      return Response('Successfully updated assignment %d.' % assignment.getId())
 
    def get_survey_submit(self, request):
       args = request.form
@@ -97,7 +98,10 @@ class PeerReviewService(object):
          return login
 
       if self.store.isInstructor(request.user):
-         return self.render('prof_dashboard.html')
+         assignments = self.store.getAllAssignments()
+         for a in assignments:
+            a.questions = map(self.store.getQuestion, loads(a.questions))
+         return self.render('prof_dashboard.html', assignments=assignments)
          #return Response("You're a professor (%s)" % request.user)
       else:
          return Response("You're a student (%s)" % request.user)

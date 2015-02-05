@@ -65,7 +65,7 @@ Polymer('async-form', {
          else
             keyed[input.key] = input.getResponse();
       });
-      this.$.ajax.body = JSON.stringify(this.serialize(keyed, numbered));
+      this.$.ajax.params = this.serialize(keyed, numbered);
       this.$.ajax.go();
    },
 
@@ -81,12 +81,12 @@ Polymer('async-form', {
 
    addInput: function() {
       this.blankInputs++;
-      var inputs = this.getInputs();
+      var inputs = this.getNumbered();
       inputs[inputs.length - 1].scrollIntoView();
    },
 
    removeInput: function() {
-      var inputs = this.getInputs();
+      var inputs = this.getNumbered();
       if (inputs.length > 1 && !(inputs[inputs.length - 1].getResponse())) {
          this.blankInputs--;
       }

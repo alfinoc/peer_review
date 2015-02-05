@@ -70,6 +70,16 @@ class RedisStore:
    def getAnswer(self, id):
       return self._getEntry(Answer, id)
 
+   def getAllCourses(self):
+      return map(self.getCourse, self.store.lrange('all_courses', 0, -1))
+
+   def getAllAssignments(self):
+      courses = self.getAllCourses()
+      assignments = []
+      for c in courses:
+         assignments += map(self.getAssignment, loads(c.assignments))
+      return assignments
+
    def _getEntry(self, constructor, id):
       entry = constructor()
       entry.setId(id)
@@ -85,8 +95,9 @@ class RedisStore:
    def _registerEntry(self, parentEntry, childEntry, parentListKey):
       if parentEntry.getId() == None:
          raise ValueError('Parent entry (%s) not stored.' % str(type(parentEntry)))      
+      initialID = childEntry.getId()
       self._storeEntry(childEntry)
-      if childEntry.getId() == None:
+      if initialID == None:
          childEntry.setParentKey(parentEntry.key())
          self._pushToHashList(parentEntry.key(), parentListKey, childEntry.getId())
 
