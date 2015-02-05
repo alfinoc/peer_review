@@ -19,6 +19,9 @@ class RedisStore:
       except redis.ConnectionError:
          raise IOError
 
+   def __contains__(self, key):
+      return self.store.exists(key)
+
    def addUser(self, username, password, isInstructor=False, name='Anonymous', email=''):
       key = _suffix(username, 'user')
       if self.store.exists(key):

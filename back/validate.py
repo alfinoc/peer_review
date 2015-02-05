@@ -1,51 +1,16 @@
-import model
-from json import loads
-
-Q_PROTO = {
-   'type': 'question',
-   'suffix': model.Question.typeSuffix,
-   'hashKeys': model.Question()._serializable
+ASST_FORM {
+   REQUIRED: ['title']
+   OPTIONAL: ['questions', 'id', 'parent', 'assigned']
 }
 
-A_PROTO = {
-   'type': 'assignment',
-   'suffix': model.Assignment.typeSuffix,
-   'hashKeys': model.Assignment()._serializable
-}
+def validateAssignmentForm(form):
+   form = dict(form)
+   for key in ASST_FORM.REQUIRED:
+      if key not in form:
+         raise ValueError('Missing form parameter (%s)' % key)
 
-R_PROTO = {
-   'type': 'assignment',
-   'suffix': model.Answer.typeSuffix,
-   'hashKeys': model.Answer()._serializable
-}
-
-def _valuePair(actual, expected):
-   return '(actual=%s,expected=%s)' % (actual, expected)
-
-def _validateProto(actual, proto):
-   # Check type.
-   print actual
-   if not 'type' in actual:
-      raise ValueError('Required proto key: type')
-   if not 'hash' in actual:
-      raise ValueError('Required proto key: hash')
-   if actual['type'] != proto['type']:
-      raise ValueError('Illegal proto type ' + valuePair(actual['type'], proto['type']))
-   # Requisit store keys.
-   for key in proto['hashKeys']:
-      if (not key in actual['hash']):
-         raise ValueError('Missing proto key (%s)' % key)
-
-def validateQuestionProto(actual):
-   _validateProto(actual, R_PROTO)
-
-def validateQuestionProto(actual):
-   _validateProto(actual, Q_PROTO)
-
-def validateAssignmentProto(actual):
-   _validateProto(actual, A_PROTO)
-   for q in actual.quesitons:
-      validateQuestionProto(q)
+   
+   
 
 def accessLegal(entry, username, type='read'):
    return False

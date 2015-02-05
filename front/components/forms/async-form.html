@@ -17,6 +17,7 @@
             </template>
          </div>
       <div>
+         <content class="keyed"></content>
          <template repeat="{{ text, i in prefill }}">
             <question-input number="{{ i + 1 }}"
                             placeholderText="{{ placeholderText }}"
@@ -50,16 +51,21 @@ Polymer('async-form', {
       // A function from list of question responses to JSON-ready object.
       // The object will be set as the sole 'data' field to outgoing AJAX
       // requests.
-      this.serialize = function(responses) { return {}; };
+      this.serialize = function(keyed, numbered) { return {}; };
    },
 
    submit: function() {
-      var responses = this.getInputs().map(function(input) {
+      var numbered = this.getNumbered().map(function(input) {
          return input.getResponse();
       });
-      this.$.ajax.body = JSON.stringify({
-         proto: this.serialize(responses),
+      var keyed = {};
+      this.getKeyed().forEach(function(input) {
+         if (input.key == null)
+            console.log('Encountered keyed input without a key.')
+         else
+            keyed[input.key] = input.getResponse();
       });
+      this.$.ajax.body = JSON.stringify(this.serialize(keyed, numbered));
       this.$.ajax.go();
    },
 
@@ -86,8 +92,12 @@ Polymer('async-form', {
       }
    },
 
-   getInputs: function() {
+   getNumbered: function() {
       return this.querySelectorAll('::shadow question-input').array();
+   },
+
+   getKeyed: function() {
+      return this.querySelectorAll('question-input').array();
    }
 });
 

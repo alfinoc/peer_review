@@ -53,6 +53,7 @@
          <paper-action-dialog backdrop id="add">
             <async-form auto header="Add Assignment" blankInputs="3" url="/survey/edit"
                         placeholderText="enter a new question">
+               <question-input key="title"></question-input>
             </async-form>
             <paper-button dismissive>CANCEL</paper-button>
             <paper-button affirmative on-click="{{ saveForm }}">SAVE</paper-button>
@@ -76,11 +77,11 @@ Polymer('assignment-card', {
          forms[i].serialize = this.toAssignmentProto.bind(this);
    },
 
-   toAssignmentProto: function(messages) {
-      var questions = messages.map(function(prompt) {
-         return PROTO.getQuestionProto(null, prompt, null);
-      });
-      return PROTO.getAssignmentProto(null, 'lol', questions);
+   toAssignmentProto: function(keyed, numbered) {
+      var proto = {};
+      proto['title'] = keyed['title']
+      proto['questions'] = JSON.stringify(numbered)
+      return proto;
    },
 
    toggleCollapseSection: function(evt) {

@@ -62,11 +62,11 @@ class Course(StoreEntry):
 
 class Assignment(StoreEntry):
    typeSuffix = 'asst'
-   def __init__(self, title='Untitled', questions=[], users=[]):
+   def __init__(self, title='Untitled', questions=[], assigned=[]):
       StoreEntry.__init__(self)
       self.addSerialProperty('title', title)
       self.addSerialProperty('questions', questions)
-      self.addSerialProperty('assigned', users)
+      self.addSerialProperty('assigned', assigned)
 
 class Question(StoreEntry):
    typeSuffix = 'quest'

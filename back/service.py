@@ -7,7 +7,7 @@ from werkzeug.contrib.securecookie import SecureCookie
 from persistent import RedisStore, Answer
 from json import loads, dumps
 from session import SessionRequest
-import validate
+import forms
 
 import inspect
 
@@ -31,21 +31,22 @@ class PeerReviewService(object):
          return Unauthorized('Sign in as an instructor to edit surveys.')
 
       # Validate
-      if len(request.form.keys()) == 0:
-         return BadRequest('Include POST body.')
-      try:
-         # TODO: Maybe fix this post body hack.
-         proto = request.form.keys()[0]
-         proto = validate.tryJSONParse(proto)['proto']
-         validate.validateAssignmentProto(proto)
-      except ValueError, e:
-         return BadRequest(e)
+      if request.method == 'POST':
+         form = forms.EditAssignmentForm(request.form)
+         if not form.validate():
+            return BadRequest(form.errors);
+         assignment = form.entry()
+         if assignment.id() != None and not assignment.key() in self.store:
+            return BadRequest('Unknown assignment key ' + assignment.key())
+      else:
+         return BadRequest('POST request required')
+
+      print assignment.hash()
 
       # If ID is stored in Assignment proto, adding will store a revision
-      # of that assignment. Otherwise, a new assignment
-      # is stored.
-      self.store.addAssignment(Assignment().loadHash(proto.hash))
-      return Response('huh')
+      # of that assignment. Otherwise, a new assignment is stored.
+      self.store.addAssignment(assignment)
+      return Response('Successfully updated assignment ' + assignment.id())
 
    def get_survey_submit(self, request):
       args = request.form
