@@ -8,7 +8,7 @@ def jsonList(form, json):
       parsed = loads(json.data)
    except:
       raise ValidationError('Illegal JSON: ' + str(json.data))
-   if type(parse) != list:
+   if type(parsed) != list:
       raise ValidationError('JSON object must be a list.')
 
 class EditAssignmentForm(Form):
@@ -20,4 +20,7 @@ class EditAssignmentForm(Form):
       id = self.asst_id.data
       title = self.title.data
       questions = loads(self.questions.data)
-      return model.Assignment(id, title, questions)
+      entry = model.Assignment(title, questions)
+      if id != None:
+         entry.setId(id)
+      return entry
