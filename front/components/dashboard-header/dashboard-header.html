@@ -1,0 +1,22 @@
+<link rel="import" href="/components/dash-card/assignment-card.html">
+<link rel="import" href="/components/dashboard-header/grid-icon.html">
+
+<polymer-element name="dashboard-header">
+   <template>
+      <link rel="stylesheet" type="text/css" href="dashboard-header.css">
+      <div class="banner" layout horizontal>
+         <div self-center><grid-icon></grid-icon></div>
+         <div self-center flex class="projname">{{ title }}</div>
+         <div self-center><div class="signincard">Mark Alfino</div></div>
+      </div>
+   </template>
+      <script>
+
+Polymer('dashboard-header', {
+   publish: {
+      loading: false
+   }
+});
+
+   </script>
+</polymer-element>

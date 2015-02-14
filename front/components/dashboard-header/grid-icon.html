@@ -1,0 +1,101 @@
+<link rel="import" href="/components/dash-card/assignment-card.html">
+
+<polymer-element name="grid-icon">
+   <template>
+      <link rel="stylesheet" type="text/css" href="grid-icon.css">
+      <grid on-click="{{ on }}">
+         <row><square></square><square></square><square></square></row>
+         <row><square></square><square></square><square></square></row>
+         <row><square></square><square></square><square></square></row>
+      </grid>
+   </template>
+      <script>
+
+Polymer('grid-icon', {
+   publish: {
+      loading: false,
+      title: '',
+      minOpacity: 0.1,
+      maxOpacity: 1
+   },
+
+   domReady: function() {
+      this.counter = 0;
+      this.interval = null;
+
+      var squares = document.querySelectorAll('::shadow square');
+      var grades = this.getGrades(squares);
+      this.initializeOpacities(grades, this.maxOpacity, this.minOpacity);
+
+      this.on = this.onCB(['green', 'indigo', 'red'], squares, grades);
+   },
+
+   // Returns an array of grades, where each grade is an array containing all
+   // squares that are the same diagonal level.
+   getGrades: function(squares) {
+      var grades = [];
+      var dim = Math.sqrt(squares.length);
+      for (var i = 0; i < squares.length; i++) {
+         var row = parseInt(i / dim);
+         var col = 2 - parseInt(i % dim);
+         if (grades[row + col] == undefined)
+            grades[row + col] = [];
+         grades[row + col].push(squares[i]);
+      }
+      return grades;
+   },
+
+   initializeOpacities: function(grades, min, max) {
+      for (var i = 0; i < grades.length; i++) {
+         var percent = i / (grades.length - 1);
+         grades[i].forEach(function(square) {
+            square.style.opacity = percent * (max - min) + min;
+         }.bind(this));
+      }
+   },
+
+   updateGridCB: function(colorClass, grades) {
+      return function() {
+         // Start on-way animation on the current grade group.
+         grades[this.counter % grades.length].forEach(function(square) {
+            square.classList.add(colorClass);
+            square.classList.add('cycle');
+         });
+
+         // Remove cycle class of the next grade group.
+         grades[(this.counter + 1) % grades.length].forEach(function(square) {
+            square.classList.remove('cycle');
+         });
+         this.counter++;
+      }.bind(this);
+   },
+
+   onCB: function(colorClasses, squares, grades) {
+      return function() {
+         // Avoid setting multiple animators.
+         if (this.interval)
+            return;
+
+         // Clear old color classes.
+         colorClasses.forEach(function(color) {
+            for (var i = squares.length - 1; i >= 0; i--)
+               squares[i].classList.remove(color)
+         }.bind(this));
+
+         // Choose a new random highlight color.
+         var color = colorClasses[parseInt(Math.random() * colorClasses.length)];
+         this.interval = setInterval(this.updateGridCB(color, grades), 200);
+      }
+   },
+
+   off: function() {
+      if (this.interval) {
+         clearInterval(this.interval);
+         this.counter = 0;
+         this.interval = null;
+      }
+   }
+});
+
+   </script>
+</polymer-element>

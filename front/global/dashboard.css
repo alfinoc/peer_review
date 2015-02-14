@@ -1,9 +1,19 @@
 body {
    background-color: #424242;
+   font-family: Avenir Next, Calibri, sans-serif;
 }
 
 html /deep/ paper-dialog::shadow #scroller,
 html /deep/ paper-action-dialog::shadow #scroller {
    width: 600px;
    height: 600px;
+}
+
+canvas#atom {
+   height: 100px;
+   width: 100px;
+}
+
+body > * {
+   margin-top: 10px;
 }

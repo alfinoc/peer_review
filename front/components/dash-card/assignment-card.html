@@ -14,7 +14,7 @@
       <link rel="stylesheet" type="text/css" href="dash-card.css">
       <h1 layout horizontal>
          <span flex self-center>Assignments</span>
-         <paper-fab class="headerbutton" icon="add" mini on-click="{{ addAssignment }}"></paper-fab>
+         <paper-fab self-center class="headerbutton" icon="add" mini on-click="{{ addAssignment }}"></paper-fab>
       </h1>
       <div class="content">
          <ul class="toplevel">
@@ -53,7 +53,7 @@
          <paper-action-dialog backdrop id="add">
             <async-form auto header="Add Assignment" blankInputs="3" url="/survey/edit"
                         placeholderText="enter a new question">
-               <question-input key="title"></question-input>
+               <question-input key="title" placeholderText="new assignment title"></question-input>
             </async-form>
             <paper-button dismissive>CANCEL</paper-button>
             <paper-button affirmative on-click="{{ saveForm }}">SAVE</paper-button>

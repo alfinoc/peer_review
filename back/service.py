@@ -31,29 +31,30 @@ class PeerReviewService(object):
       if not self.store.isInstructor(request.user):
          return Unauthorized('Sign in as an instructor to edit surveys.')
 
-      if request.method == 'POST':
-         # Validate
-         form = forms.EditAssignmentForm(request.form)
-         if not form.validate():
-            return BadRequest(form.errors);
-
-         # Store assignment
-         assignment = model.Assignment(form.title.data)
-         assignment.setId(form.asst_id.data)
-
-         # If we're about to store a revision, verify that the ID is valid.
-         if assignment.getId() != None and not assignment.key() in self.store:
-            return BadRequest('Unknown assignment key ' + assignment.key())
-         self.store.addAssignment(self.store.getCourse(1), assignment)
-
-         # Store all questions
-         questions = []
-         for prompt in loads(form.questions.data):
-            q = model.Question(prompt)
-            self.store.addQuestion(assignment, q)
-            questions.append(q.getId())
-      else:
+      if request.method != 'POST':
          return BadRequest('POST request required')
+
+      # Validate
+      form = forms.EditAssignmentForm(request.form)
+      if not form.validate():
+         return BadRequest(form.errors);
+
+      # Store assignment
+      assignment = model.Assignment(form.title.data)
+      assignment.setId(form.asst_id.data)
+
+      # If we're about to store a revision, verify that the ID is valid.
+      if assignment.getId() != None and not assignment.key() in self.store:
+         return BadRequest('Unknown assignment key ' + assignment.key())
+      self.store.addAssignment(self.store.getCourse(1), assignment)
+
+      # Store all questions
+      questions = []
+      for prompt in loads(form.questions.data):
+         q = model.Question(prompt)
+         self.store.addQuestion(assignment, q)
+         questions.append(q.getId())
+
       return Response('Successfully updated assignment %d.' % assignment.getId())
 
    def get_survey_submit(self, request):

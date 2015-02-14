@@ -1,9 +1,11 @@
 <link rel="import" href="/components/dash-card/assignment-card.html">
+<link rel="import" href="/components/dashboard-header/dashboard-header.html">
 
 <polymer-element name="prof-dashboard">
    <template>
       <link rel="stylesheet" type="text/css" href="/components/controllers/prof-dashboard.css">
       <div>
+         <dashboard-header title="Instructor Dashboard"></dashboard-header>
          <assignment-card id="acard"></assignment-card>
       </div>
    </template>

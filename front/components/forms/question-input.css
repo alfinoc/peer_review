@@ -8,13 +8,8 @@
    box-sizing: border-box;
 }
 
-.number {
-   float: left;
-}
-
 .container {
    padding: 20px;
-   padding-left: 0px;
 }
 
 textarea {
@@ -24,7 +19,7 @@ textarea {
    border: 1px solid;
    border-color: #DDD;
    transition: border-color 0.2s ease-in-out;
-   min-height: 150px;
+   min-height: 70px;
 }
 
 textarea:focus {
@@ -33,6 +28,7 @@ textarea:focus {
 
 .number {
    padding: 20px;
+   padding-right: 0px;
    color: gray;
    font-size: xx-large;
 }

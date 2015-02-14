@@ -2,7 +2,9 @@
    <template>
       <link rel="stylesheet" type="text/css" href="/components/forms/question-input.css">
       <div layout horizontal>
-         <div class="number">#{{ number }}</div>
+         <template if="{{ number }}">
+            <div class="number">#{{ number }}</div>
+         </template>
          <div class="container" flex>
             <template if="{{ prompt }}">
                <div class="prompt">{{ prompt }}</div>

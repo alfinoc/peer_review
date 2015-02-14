@@ -1,5 +1,4 @@
 :host {
-   width: 700px !important;
    display: block;
    margin: auto;
 }
@@ -43,4 +42,3 @@ dash-card:nth-child(3)::shadow h1 {
    background-color: #F44336;
 }
 */
-
