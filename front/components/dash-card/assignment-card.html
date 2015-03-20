@@ -42,7 +42,8 @@
                   </core-collapse>
                   <paper-action-dialog backdrop>
                      <async-form auto header="Edit Assignment" prefill="{{ a.questions }}"
-                                      placeholderText="enter a new question" url="/survey/edit">
+                                      placeholderText="enter a new question" url="/survey/edit"
+                                      revision="{{ a.revision }}">
                      </async-form>
                      <paper-button dismissive>CANCEL</paper-button>
                      <paper-button affirmative on-click="{{ saveForm }}">SAVE</paper-button>
@@ -69,12 +70,6 @@ Polymer('assignment-card', {
 
    created: function() {
       this.assignments = [];
-   },
-
-   domReady: function() {
-      var forms = this.querySelectorAll('::shadow async-form').array();
-      for (var i = 0; i < forms.length; i++)
-         forms[i].serialize = this.toAssignmentProto.bind(this);
    },
 
    toAssignmentProto: function(keyed, numbered) {
@@ -107,7 +102,8 @@ Polymer('assignment-card', {
 
    saveForm: function(evt) {
       var ancestor = evt.target.parentElement;
-      ancestor.querySelector('async-form').submit();
+      var serialize = this.toAssignmentProto.bind(this);
+      ancestor.querySelector('async-form').submit(serialize);
    }
 });
 
