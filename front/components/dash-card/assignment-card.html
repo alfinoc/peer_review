@@ -9,6 +9,8 @@
 <link rel="import" href="/components/standard/paper-dialog/paper-dialog.html">
 <link rel="import" href="/components/forms/async-form.html">
 
+<link rel="import" href="/components/forms/editable-text.html">
+
 <polymer-element name="assignment-card">
    <template>
       <link rel="stylesheet" type="text/css" href="dash-card.css">
@@ -17,6 +19,7 @@
          <paper-fab self-center class="headerbutton" icon="add" mini on-click="{{ addAssignment }}"></paper-fab>
       </h1>
       <div class="content">
+         <!--
          <ul class="toplevel">
             <template repeat="{{ a in assignments }}">
                <li>
@@ -51,6 +54,7 @@
                </li>
             </template>
          </ul>
+
          <paper-action-dialog backdrop id="add">
             <async-form auto header="Add Assignment" blankInputs="3" url="/survey/edit"
                         placeholderText="enter a new question">
@@ -59,6 +63,9 @@
             <paper-button dismissive>CANCEL</paper-button>
             <paper-button affirmative on-click="{{ saveForm }}">SAVE</paper-button>
          </paper-action-dialog>
+         -->
+         <editable-text></editable-text>
+         <editable-text></editable-text>
       </div>
    </template>
       <script>
