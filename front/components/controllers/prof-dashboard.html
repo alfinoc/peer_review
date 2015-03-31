@@ -16,7 +16,7 @@ Polymer('prof-dashboard', {
       // Load model from light DOM.
       this.courses = this.gather('course', ['shortname', 'longname']);
       this.students = this.gather('student', ['name']);
-      var assignments = this.gather('assignment', ['name']);
+      var assignments = this.gather('assignment', ['name', 'revision']);
       assignments.forEach(function(asst) {
          var elt = asst['element'];
          var questions = elt.querySelectorAll('question').array();

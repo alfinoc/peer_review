@@ -17,6 +17,7 @@
             </template>
          </div>
       <div>
+         <span></span> <!-- hack to get nth-child indexing to work with above -->
          <content class="keyed"></content>
          <template repeat="{{ text, i in prefill }}">
             <question-input number="{{ i + 1 }}"
@@ -24,7 +25,6 @@
                             defaultText="{{ text }}">
             </question-input>
          </template>
-         <span></span> <!-- hack to get nth-child indexing to work with above -->
          <template repeat="{{ i in range(blankInputs) }}">
             <question-input number="{{ i + prefill.length }}"
                             placeholderText="{{ placeholderText }}">
@@ -42,19 +42,17 @@ Polymer('async-form', {
       auto: false,
       placeholderText: '',
       prefill: [],
-      url: '/'
+      url: '/',
+      revision: null
    },
 
    created: function() {
       prefill = [];
-
-      // A function from list of question responses to JSON-ready object.
-      // The object will be set as the sole 'data' field to outgoing AJAX
-      // requests.
-      this.serialize = function(keyed, numbered) { return {}; };
    },
 
-   submit: function() {
+   // 'serialize(keyed, numbered)' is a function from list of question responses
+   // to JSON-ready object.
+   submit: function(serialize) {
       var numbered = this.getNumbered().map(function(input) {
          return input.getResponse();
       });
@@ -65,7 +63,10 @@ Polymer('async-form', {
          else
             keyed[input.key] = input.getResponse();
       });
-      this.$.ajax.params = this.serialize(keyed, numbered);
+      var data = serialize(keyed, numbered)
+      if (this.revision)
+         data['revision_id'] = this.revision;
+      this.$.ajax.params = data;
       this.$.ajax.go();
    },
 

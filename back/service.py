@@ -41,7 +41,7 @@ class PeerReviewService(object):
 
       # Store assignment
       assignment = model.Assignment(form.title.data)
-      assignment.setId(form.asst_id.data)
+      assignment.setId(form.revision_id.data)
 
       # If we're about to store a revision, verify that the ID is valid.
       if assignment.getId() != None and not assignment.key() in self.store:

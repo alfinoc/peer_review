@@ -89,3 +89,11 @@ paper-radio-button::shadow #offRadio {
 .hide {
    display: none;
 }
+
+.form {
+   width: 50%;
+}
+
+.form > div {
+   margin-bottom: 20px;
+}

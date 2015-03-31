@@ -1,0 +1,132 @@
+<link rel="import" href="/components/standard/core-ajax/core-ajax.html">
+
+<polymer-element name="editable-text">
+   <template>
+      <style>
+      #wrapper {
+         position: relative;
+      }
+
+      #input, #placeholder {
+         padding: 5px;
+         outline: none;
+      }
+
+      #placeholder {
+         position: absolute;
+         top: 0px;
+         left: 0px;
+         pointer-events: none;
+         font-style: italic;
+         color: grey;
+      }
+
+      #input:focus {
+         border-radius: 3px;
+         background-color: #424242;
+         color: white;
+         display: inline-block;
+      }
+
+      #button {
+         position: absolute;
+         top: 0px;
+         right: 0px;
+      }
+      </style>
+      
+      <div id="wrapper">
+         <div id="input" on-dblclick="{{ unlock }}" on-blur="{{ lock }}">
+         {{ initial }}
+         </div>
+      </div>
+      <template if="{{ storeKey }}">
+         <core-ajax
+            url="http://localhost:5000/store/set"
+            params='{ "" }'
+         ></core-ajax>
+      </template>
+   </template>
+      <script>
+
+Polymer('editable-text', {
+   publish: {
+      placeholder: 'enter text',
+      unlocked: {
+         value: false,
+         reflect: true
+      },
+      value: '',
+      storeKey: '',
+      auto: false
+   },
+
+   domReady: function() {
+      this.changeValue(this.value);
+   },
+
+   changeValue: function(value) {
+      this.$.input.innerHTML = this.toHTML(value);
+      this.guardEmpty();
+   },
+
+   getValue: function() {
+      return this.fromHTML(this.$.input.innerHTML);
+   },
+
+   unlock: function() {
+      if (!this.unlocked) {
+         this.unlocked = true;
+      }
+   },
+
+   lock: function() {
+      if (this.unlocked) {
+         this.unlocked = false;
+         if (this.auto) {
+            this.save();
+         }
+      }
+      this.guardEmpty();
+   },
+
+   unlockedChanged: function() {
+      if (this.unlocked) {
+         this.$.input.setAttribute('contenteditable', '');
+         this.$.input.focus();
+      } else {
+         this.$.input.removeAttribute('contenteditable');
+      }
+   },
+
+   save: function() {
+      console.log('attempting save');
+      console.log('current value: ' + this.getValue());
+      if (this.storeKey) {
+         this.$.ajax.go();
+      }
+   },
+
+   guardEmpty: function() {
+      if (this.$.input.innerHTML.trim().length == 0)
+         this.$.input.innerHTML = '<br>';
+   },
+
+   toHTML: function(str) {
+      return this.replaceAll(str, '\n', '<br>');
+   },
+
+   fromHTML: function(html) {
+      return this.replaceAll(html, '<br>', '\n');
+   },
+
+   replaceAll: function(str, find, replace) {
+      function escapeRegExp(s) {
+         return s.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+      }
+      return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+   }
+});
+
+   </script>
+</polymer-element>

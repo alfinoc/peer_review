@@ -19,3 +19,7 @@ body > * {
    font-family: inherit;
    font-size: inherit;
 }
+
+* /deep/ h1, * /deep/ h2 {
+   font-weight: normal;
+}

@@ -7,7 +7,7 @@
 <link rel="import" href="/components/standard/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="/components/standard/paper-dialog/paper-action-dialog.html">
 <link rel="import" href="/components/standard/paper-dialog/paper-dialog.html">
-<link rel="import" href="/components/forms/async-form.html">
+<link rel="import" href="/components/standard/paper-input/paper-input.html">
 
 <link rel="import" href="/components/forms/editable-text.html">
 
@@ -19,14 +19,14 @@
          <paper-fab self-center class="headerbutton" icon="add" mini on-click="{{ addAssignment }}"></paper-fab>
       </h1>
       <div class="content">
-         <!--
+         
          <ul class="toplevel">
             <template repeat="{{ a in assignments }}">
                <li>
                   <div layout horizontal>
                      <paper-icon-button id="edit" class="hide" icon="editor:mode-edit" on-click="{{ editAssignment }}"></paper-icon-button>
                      <div class="clickable" on-click="{{ toggleCollapseSection }}" flex self-center>
-                        {{ a.name }}
+                        {{ a.name || 'Untitled' }}
                      </div>
                      <paper-radio-group selected="off" class="dark">
                         <paper-radio-button name="off"></paper-radio-button>
@@ -38,35 +38,23 @@
                      <template if="{{ a.questions && a.questions.length > 0 }}">
                         <ol>
                            <template repeat="{{ q in a.questions }}">
-                              <li>{{ q }}</li>
+                              <li><editable-text value="{{ q }}"></editable-text></li>
                            </template>
                         </ol>
                      </template>
                   </core-collapse>
                   <paper-action-dialog backdrop>
-                     <async-form auto header="Edit Assignment" prefill="{{ a.questions }}"
-                                      placeholderText="enter a new question" url="/survey/edit"
-                                      revision="{{ a.revision }}">
-                     </async-form>
-                     <paper-button dismissive>CANCEL</paper-button>
-                     <paper-button affirmative on-click="{{ saveForm }}">SAVE</paper-button>
+                     <h1>Edit Assignment</h1>
+                     <div layout vertical class="form">
+                        <paper-input floatinglabel label="Title" value="{{ a.name }}"></paper-input>
+                        <paper-button>Delete</paper-button>
+                     <div>
+                     <paper-button dismissive>Cancel</paper-button>
+                     <paper-button affirmative on-click="{{ saveForm }}">Save</paper-button>
                   </paper-action-dialog>
                </li>
             </template>
          </ul>
-
-         <paper-action-dialog backdrop id="add">
-            <async-form auto header="Add Assignment" blankInputs="3" url="/survey/edit"
-                        placeholderText="enter a new question">
-               <question-input key="title" placeholderText="new assignment title"></question-input>
-            </async-form>
-            <paper-button dismissive>CANCEL</paper-button>
-            <paper-button affirmative on-click="{{ saveForm }}">SAVE</paper-button>
-         </paper-action-dialog>
-         -->
-         <editable-text></editable-text>
-         <editable-text></editable-text>
-      </div>
    </template>
       <script>
 
