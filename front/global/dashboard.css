@@ -17,3 +17,18 @@ canvas#atom {
 body > * {
    margin-top: 10px;
 }
+
+core-overlay-layer /deep/ paper-action-dialog .form {
+   width: 60%;
+   margin: auto;
+}
+
+core-overlay-layer /deep/ paper-action-dialog .form > * {
+   margin-bottom: 20px;
+}
+
+core-overlay-layer /deep/ paper-action-dialog .form .delete {
+   color: #F44336;
+   border-radius: 5px;
+   background-color: #FFEBEE;
+}

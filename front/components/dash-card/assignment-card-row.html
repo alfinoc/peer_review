@@ -1,6 +1,5 @@
 <link rel="import" href="/components/standard/core-icon/core-icon.html">
 <link rel="import" href="/components/standard/core-icons/editor-icons.html">
-<link rel="import" href="/components/standard/paper-fab/paper-fab.html">
 <link rel="import" href="/components/standard/core-collapse/core-collapse.html">
 <link rel="import" href="/components/standard/paper-radio-group/paper-radio-group.html">
 <link rel="import" href="/components/standard/paper-button/paper-button.html">
@@ -11,103 +10,74 @@
 
 <link rel="import" href="/components/forms/editable-text.html">
 
-<polymer-element name="assignment-card">
+<polymer-element name="assignment-card-row">
    <template>
-      <link rel="stylesheet" type="text/css" href="dash-card.css">
-      <!-- Card header. -->
-      <h1 layout horizontal>
-         <span flex self-center>Assignments</span>
-         <paper-fab self-center class="headerbutton" icon="add" mini on-click="{{ addAssignment }}"></paper-fab>
-      </h1>
-      <div class="content">
-         
-         <ul class="toplevel">
-            <template repeat="{{ a in assignments }}">
-               <li>
-                  <!-- Title and control buttons. -->
-                  <div layout horizontal>
-                     <paper-icon-button id="edit" class="hide" icon="editor:mode-edit" on-click="{{ editAssignment }}"></paper-icon-button>
-                     <div class="clickable" on-click="{{ toggleCollapseSection }}" flex self-center>
-                        {{ a.name || 'Untitled' }}
-                     </div>
-                     <paper-icon-button id="save" class="hide" icon="save" on-click="{{ a.id | saveQuestions }}" noink></paper-icon-button>
-                     <paper-radio-group selected="off" class="dark">
-                        <paper-radio-button name="off"></paper-radio-button>
-                        <paper-radio-button name="respond"></paper-radio-button>
-                        <paper-radio-button name="feedback"></paper-radio-button>
-                     </paper-radio-group>
-                  </div>
+      <link rel="stylesheet" type="text/css" href="assignment-card-row.css">
+      <!-- Title and control buttons. -->
+      <div layout horizontal>
+         <paper-icon-button id="edit" class="hide" icon="editor:mode-edit" on-click="{{ edit }}" noink></paper-icon-button>
+         <div class="clickable" on-click="{{ toggleCollapseSection }}" flex self-center>
+            {{ name || 'Untitled' }}
+         </div>
+         <paper-icon-button id="save" class="hide" icon="save" on-click="{{ saveQuestions }}" noink></paper-icon-button>
+      </div>
 
-                  <!-- Question list. -->
-                  <core-collapse>
-                     <template if="{{ a.questions && a.questions.length > 0 }}">
-                        <ol>
-                           <template repeat="{{ q in a.questions }}">
-                              <li><editable-text value="{{ q }}"></editable-text></li>
-                           </template>
-                        </ol>
-                     </template>
-                  </core-collapse>
-                  <paper-action-dialog backdrop>
-                     <h1>Edit Assignment</h1>
-                     <div layout vertical class="form">
-                        <paper-input floatinglabel label="Title" value="{{ a.name }}"></paper-input>
-                        <paper-button>Delete</paper-button>
-                     <div>
-                     <paper-button dismissive>Cancel</paper-button>
-                     <paper-button affirmative on-click="{{ saveForm }}">Save</paper-button>
-                  </paper-action-dialog>
-               </li>
-            </template>
-         </ul>
+      <!-- Question list. -->
+      <core-collapse id="collapse">
+         <template if="{{ questions && questions.length > 0 }}">
+            <ol>
+               <template repeat="{{ q in questions }}">
+                  <li><editable-text value="{{ q }}" storeKey="{{ q.storeKey }}"></editable-text></li>
+               </template>
+            </ol>
+         </template>
+      </core-collapse>
+
+      <!-- Assignment edit dialog. -->
+      <paper-action-dialog id="editform" backdrop>
+         <h1>Edit Assignment</h1>
+         <div layout vertical class="form">
+            <paper-input floatinglabel label="Title" value="{{ name }}"></paper-input>
+            <paper-button dismissive class="delete" self-center>Delete</paper-button>
+         </div>
+         <paper-button dismissive>Cancel</paper-button>
+         <paper-button affirmative on-click="{{ saveForm }}">Save</paper-button>
+      </paper-action-dialog>
    </template>
       <script>
 
-Polymer('assignment-card', {
+Polymer('assignment-card-row', {
    publish: {
-      'assignments': []
+      'storeKey': null,
+      'name': '',
+      'questions': []
    },
 
    created: function() {
-      this.assignments = [];
+      this.questions = [];
    },
 
-   toAssignmentProto: function(keyed, numbered) {
-      var proto = {};
-      proto['title'] = keyed['title']
-      proto['questions'] = JSON.stringify(numbered)
-      return proto;
+   saveQuestions: function() {
+      this.querySelectorAll('* /deep/ editable-text').array().forEach(function(q) {
+         if (q.unsaved) q.save();
+      });
+   },
+
+   edit: function() {
+      this.$.editform.open();
    },
 
    toggleCollapseSection: function(evt) {
-      var ancestor = evt.target.parentElement.parentElement;
-      var collapse = ancestor.querySelector('core-collapse');
-      var editButton = ancestor.querySelector('#edit');
-      var saveButton = ancestor.querySelector('#save');
-      collapse.toggle();
-      if (collapse.opened) {
+      var editButton = this.$.edit;
+      var saveButton = this.$.save;
+      this.$.collapse.toggle();
+      if (this.$.collapse.opened) {
          editButton.classList.remove('hide');
          saveButton.classList.remove('hide');
       } else {
          editButton.classList.add('hide');
          saveButton.classList.add('hide');
       }
-   },
-
-   addAssignment: function() {
-      this.$.add.toggle();
-   },
-
-   editAssignment: function(evt) {
-      var ancestor = evt.target.parentElement.parentElement;
-      var editor = ancestor.querySelector('paper-action-dialog');
-      editor.toggle();
-   },
-
-   saveForm: function(evt) {
-      var ancestor = evt.target.parentElement;
-      var serialize = this.toAssignmentProto.bind(this);
-      ancestor.querySelector('async-form').submit(serialize);
    }
 });
 

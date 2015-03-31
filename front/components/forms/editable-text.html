@@ -5,10 +5,10 @@
       <link rel="stylesheet" type="text/css" href="editable-text.css">
       <div id="wrapper">
          <div id="input"
-            saved?="{{ successfullySaved == value }}"
+            saved?="{{ !unsaved }}"
             on-dblclick="{{ unlock }}"
             on-blur="{{ lock }}">
-         {{ successfullySaved }}
+         {{ lastSaved }}
          </div>
       </div>
       <template if="{{ storeKey }}">
@@ -29,12 +29,16 @@ Polymer('editable-text', {
       },
       value: '',
       storeKey: '',
-      successfullySaved: '',
+      lastSaved: '',
       auto: false
    },
 
+   computed: {
+      unsaved: 'lastSaved != value',
+   },
+
    domReady: function() {
-      this.successfullySaved = this.value;
+      this.lastSaved = this.value;
       this.changeValue(this.value);
    },
 

@@ -9,7 +9,7 @@
 <link rel="import" href="/components/standard/paper-dialog/paper-dialog.html">
 <link rel="import" href="/components/standard/paper-input/paper-input.html">
 
-<link rel="import" href="/components/forms/editable-text.html">
+<link rel="import" href="/components/dash-card/assignment-card-row.html">
 
 <polymer-element name="assignment-card">
    <template>
@@ -20,43 +20,14 @@
          <paper-fab self-center class="headerbutton" icon="add" mini on-click="{{ addAssignment }}"></paper-fab>
       </h1>
       <div class="content">
-         
          <ul class="toplevel">
             <template repeat="{{ a in assignments }}">
                <li>
-                  <!-- Title and control buttons. -->
-                  <div layout horizontal>
-                     <paper-icon-button id="edit" class="hide" icon="editor:mode-edit" on-click="{{ editAssignment }}"></paper-icon-button>
-                     <div class="clickable" on-click="{{ toggleCollapseSection }}" flex self-center>
-                        {{ a.name || 'Untitled' }}
-                     </div>
-                     <paper-icon-button id="save" class="hide" icon="save" on-click="{{ a.id | saveQuestions }}" noink></paper-icon-button>
-                     <paper-radio-group selected="off" class="dark">
-                        <paper-radio-button name="off"></paper-radio-button>
-                        <paper-radio-button name="respond"></paper-radio-button>
-                        <paper-radio-button name="feedback"></paper-radio-button>
-                     </paper-radio-group>
-                  </div>
-
-                  <!-- Question list. -->
-                  <core-collapse>
-                     <template if="{{ a.questions && a.questions.length > 0 }}">
-                        <ol>
-                           <template repeat="{{ q in a.questions }}">
-                              <li><editable-text value="{{ q }}"></editable-text></li>
-                           </template>
-                        </ol>
-                     </template>
-                  </core-collapse>
-                  <paper-action-dialog backdrop>
-                     <h1>Edit Assignment</h1>
-                     <div layout vertical class="form">
-                        <paper-input floatinglabel label="Title" value="{{ a.name }}"></paper-input>
-                        <paper-button>Delete</paper-button>
-                     <div>
-                     <paper-button dismissive>Cancel</paper-button>
-                     <paper-button affirmative on-click="{{ saveForm }}">Save</paper-button>
-                  </paper-action-dialog>
+                  <assignment-card-row
+                     storeKey="{{ a.id }}"
+                     name="{{ a.name }}"
+                     questions="{{ a.questions }}">
+                  </assignment-card-row>
                </li>
             </template>
          </ul>
@@ -72,43 +43,9 @@ Polymer('assignment-card', {
       this.assignments = [];
    },
 
-   toAssignmentProto: function(keyed, numbered) {
-      var proto = {};
-      proto['title'] = keyed['title']
-      proto['questions'] = JSON.stringify(numbered)
-      return proto;
-   },
-
-   toggleCollapseSection: function(evt) {
-      var ancestor = evt.target.parentElement.parentElement;
-      var collapse = ancestor.querySelector('core-collapse');
-      var editButton = ancestor.querySelector('#edit');
-      var saveButton = ancestor.querySelector('#save');
-      collapse.toggle();
-      if (collapse.opened) {
-         editButton.classList.remove('hide');
-         saveButton.classList.remove('hide');
-      } else {
-         editButton.classList.add('hide');
-         saveButton.classList.add('hide');
-      }
-   },
-
    addAssignment: function() {
       this.$.add.toggle();
    },
-
-   editAssignment: function(evt) {
-      var ancestor = evt.target.parentElement.parentElement;
-      var editor = ancestor.querySelector('paper-action-dialog');
-      editor.toggle();
-   },
-
-   saveForm: function(evt) {
-      var ancestor = evt.target.parentElement;
-      var serialize = this.toAssignmentProto.bind(this);
-      ancestor.querySelector('async-form').submit(serialize);
-   }
 });
 
    </script>

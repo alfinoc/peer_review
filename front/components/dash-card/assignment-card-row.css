@@ -1,0 +1,61 @@
+.clickable {
+   cursor: pointer;
+}
+
+paper-radio-button::shadow #ink[checked] {
+   color: #424242;
+}
+
+paper-radio-button[checked]::shadow #offRadio,
+paper-radio-button::shadow #offRadio {
+   border-color: #424242;
+}
+
+paper-radio-button::shadow #onRadio {
+   background-color: #2196F3;
+}
+
+#edit {
+   position: absolute;
+   left: -32px;
+}
+
+#edit:hover {
+   color: white;
+}
+
+#save:hover {
+   color: #424242;
+}
+
+#edit, #save {
+   color: #2196F3;
+   padding: 0px;
+   transition: color ease-in-out 0.2s;
+}
+
+.hide {
+   display: none;
+}
+
+.form {
+   width: 50%;
+}
+
+.form > div {
+   margin-bottom: 20px;
+}
+
+:host {
+   display: block;
+   padding: 10px;
+   padding-left: 15px;
+   paddin-right: 15px;
+   position: relative;
+}
+
+ol {
+   margin: 10px;
+   font-size: smaller;
+   padding-left: 25px;
+}
