@@ -2,42 +2,13 @@
 
 <polymer-element name="editable-text">
    <template>
-      <style>
-      #wrapper {
-         position: relative;
-      }
-
-      #input, #placeholder {
-         padding: 5px;
-         outline: none;
-      }
-
-      #placeholder {
-         position: absolute;
-         top: 0px;
-         left: 0px;
-         pointer-events: none;
-         font-style: italic;
-         color: grey;
-      }
-
-      #input:focus {
-         border-radius: 3px;
-         background-color: #424242;
-         color: white;
-         display: inline-block;
-      }
-
-      #button {
-         position: absolute;
-         top: 0px;
-         right: 0px;
-      }
-      </style>
-      
+      <link rel="stylesheet" type="text/css" href="editable-text.css">
       <div id="wrapper">
-         <div id="input" on-dblclick="{{ unlock }}" on-blur="{{ lock }}">
-         {{ initial }}
+         <div id="input"
+            saved?="{{ successfullySaved == value }}"
+            on-dblclick="{{ unlock }}"
+            on-blur="{{ lock }}">
+         {{ successfullySaved }}
          </div>
       </div>
       <template if="{{ storeKey }}">
@@ -58,10 +29,12 @@ Polymer('editable-text', {
       },
       value: '',
       storeKey: '',
+      successfullySaved: '',
       auto: false
    },
 
    domReady: function() {
+      this.successfullySaved = this.value;
       this.changeValue(this.value);
    },
 
@@ -71,7 +44,7 @@ Polymer('editable-text', {
    },
 
    getValue: function() {
-      return this.fromHTML(this.$.input.innerHTML);
+      return this.fromHTML(this.$.input.innerHTML.trim());
    },
 
    unlock: function() {
@@ -86,6 +59,7 @@ Polymer('editable-text', {
          if (this.auto) {
             this.save();
          }
+         this.value = this.getValue();
       }
       this.guardEmpty();
    },
@@ -105,6 +79,10 @@ Polymer('editable-text', {
       if (this.storeKey) {
          this.$.ajax.go();
       }
+   },
+
+   checkAsync: function() {
+      // if save goes wrong, report. else switch to saved state.
    },
 
    guardEmpty: function() {

@@ -1,0 +1,30 @@
+#wrapper {
+   position: relative;
+}
+
+#input, #placeholder {
+   padding: 5px;
+   outline: none;
+}
+
+#placeholder {
+   position: absolute;
+   top: 0px;
+   left: 0px;
+   pointer-events: none;
+   font-style: italic;
+   color: grey;
+}
+
+#input:focus, #input:not([saved]) {
+   border-radius: 3px;
+   background-color: #424242;
+   color: white;
+   display: inline-block;
+}
+
+#button {
+   position: absolute;
+   top: 0px;
+   right: 0px;
+}
