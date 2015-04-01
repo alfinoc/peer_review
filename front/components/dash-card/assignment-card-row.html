@@ -35,10 +35,12 @@
 
       <!-- Assignment edit dialog. -->
       <paper-action-dialog id="editform" backdrop>
-         <h1>Edit Assignment</h1>
+         <div layout horizontal>
+            <h1 flex>Edit Assignment</h1>
+            <paper-button dismissive class="delete" self-center>Delete</paper-button>
+         </div>
          <div layout vertical class="form">
             <paper-input floatinglabel label="Title" value="{{ name }}"></paper-input>
-            <paper-button dismissive class="delete" self-center>Delete</paper-button>
          </div>
          <paper-button dismissive>Cancel</paper-button>
          <paper-button affirmative on-click="{{ saveForm }}">Save</paper-button>
@@ -65,6 +67,10 @@ Polymer('assignment-card-row', {
 
    edit: function() {
       this.$.editform.open();
+   },
+
+   delete: function() {
+
    },
 
    toggleCollapseSection: function(evt) {

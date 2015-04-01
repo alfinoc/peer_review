@@ -3,16 +3,13 @@ body {
    font-family: Avenir Next, Calibri, sans-serif;
 }
 
+/*
 html /deep/ paper-dialog::shadow #scroller,
 html /deep/ paper-action-dialog::shadow #scroller {
    width: 600px;
    height: 600px;
 }
-
-canvas#atom {
-   height: 100px;
-   width: 100px;
-}
+*/
 
 body > * {
    margin-top: 10px;
@@ -27,8 +24,9 @@ core-overlay-layer /deep/ paper-action-dialog .form > * {
    margin-bottom: 20px;
 }
 
-core-overlay-layer /deep/ paper-action-dialog .form .delete {
+core-overlay-layer /deep/ paper-action-dialog .delete {
    color: #F44336;
    border-radius: 5px;
    background-color: #FFEBEE;
+   margin-left: 20px
 }
