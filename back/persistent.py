@@ -2,6 +2,7 @@ from passlib.apps import custom_app_context as pwd_context
 from passlib.hash import sha256_crypt
 from bisect import bisect_left
 from json import loads
+from functools import partial
 import redis
 
 from model import Course, Assignment, Question, Answer
@@ -69,6 +70,29 @@ class RedisStore:
 
    def getAnswer(self, id):
       return self._getEntry(Answer, id)
+
+   def guessAccessors(self, key):
+      try:
+         id, suffix = key.split(':')
+         id = int(id)
+      except:
+         raise ValueError('illegal key format')
+      # TODO: issue is that setting a revision really shouldn't require that you
+      # given the name of the parent. should be able to just add without a parent.
+      # sort of thinking you should provide a revise(id) interface to keep things clear
+      get, set = self._accessors(suffix)
+      return (partial(get, id), partial(set, id))
+
+   def _accessors(self, suffix):
+      accessors = {
+         model.Course.typeSuffix: (self.getCourse, self.addCourse),
+         model.Assignment.typeSuffix: (self.getAssignment, self.addAssignment),
+         model.Question.typeSuffix: (self.getQuestion, self.addQuestion),
+         model.Answer.typeSuffix: (self.getAnswer, self.addAnswer)
+      }
+      if suffix not in accessors:
+         raise ValueError('unknown suffix')
+      return accessors[suffix]
 
    def getAllCourses(self):
       return map(self.getCourse, self.store.lrange('all_courses', 0, -1))

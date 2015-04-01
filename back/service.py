@@ -38,8 +38,18 @@ class PeerReviewService(object):
       form = forms.ChangeForm(request.args)  #TODO: change back
       if not form.validate():
          return BadRequest(form.errors);
-      return Response(str(form))
+      if form.store_key.data not in self.store:
+         return BadRequest('unknown store_key')
 
+      # Change hash_key's value and store the revision.
+      key = form.hash_key.data
+      value = form.hash_value.data
+      get, set = self.store.guessAccessors(key)
+      # TODO: a bunch
+      # get previous entry
+      if key != None:
+         entry[key] = value
+      # set revision
 
       """
       # Store assignment

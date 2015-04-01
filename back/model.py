@@ -52,6 +52,16 @@ class StoreEntry:
          self.addSerialProperty(key, hash[key])
       return self
 
+   def __getitem__(self, key):
+      if key not in self._serializable:
+         raise KeyError()
+      return getattr(self, key)
+
+   def __setitem__(self, key, value):
+      if key not in self._serializable:
+         raise KeyError()
+      return setattr(self, key, value)
+
 class Course(StoreEntry):
    typeSuffix = 'course'
    def __init__(self, title='Untitled', assignments=[], participants=[]):

@@ -40,10 +40,9 @@ def non_empty(form, field):
       raise ValidationError('must be non-empty')
 
 class ChangeForm(Form):
-   title = StringField('Assignment Title', [non_empty])
    store_key = StringField('Persistent Key for Entry (suffix and ID)', [validators.Required(), validate_suffix])
-   hash_key = StringField('Entry Key', [validators.Optional(), editable])
-   hash_value = StringField('Entry Value')
+   hash_key = StringField('Entry Key', [validators.Required(), editable])
+   hash_value = StringField('Entry Value', [validators.Required()])
 
 class AddForm(Form):
    pass
