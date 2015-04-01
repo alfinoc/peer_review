@@ -2,6 +2,12 @@ from wtforms import Form, IntegerField, StringField, ValidationError, validators
 from json import loads
 import model
 
+LEGAL_EDITS = {
+   'asst': ['title'],
+   'quest': ['title'],
+   'course': ['title'],
+}
+
 def jsonList(form, json):
    print form, json
    try:
@@ -11,16 +17,36 @@ def jsonList(form, json):
    if type(parsed) != list:
       raise ValidationError('JSON object must be a list.')
 
-class EditAssignmentForm(Form):
-   revision_id = IntegerField('Assignment ID')
-   title = StringField('Assignment Title')
-   questions = StringField('Question List', validators=[jsonList])
+# Returns the suffix of the ':' delimited store key.
+def suffix(storeKey):
+   return storeKey.split(':')[1]
 
-   def entry(self):
-      id = self.asst_id.data
-      title = self.title.data
-      questions = loads(self.questions.data)
-      entry = model.Assignment(title, questions)
-      if id != None:
-         entry.setId(id)
-      return entry
+# Avoids error iff the store key has a legal suffix.
+def validate_suffix(form, storeKey):
+   legal = LEGAL_EDITS.keys()
+   if ':' not in storeKey.data or suffix(storeKey.data) not in legal:
+      raise ValidationError('suffix must be one of {0}.'.format(legal))
+
+# Avoids error iff hashKey is a legal edit.
+def editable(form, hashKey):
+   validate_suffix(form, form.store_key)
+   legal = LEGAL_EDITS[suffix(form.store_key.data)]
+   if form.hashKey.data not in legal:
+      raise ValidationError('must be one of {0}.'.format(legal))
+
+# Avoids error iff field's data is not empty or all whitespace.
+def non_empty(form, field):
+   if field.data.strip() == '':
+      raise ValidationError('must be non-empty')
+
+class ChangeForm(Form):
+   title = StringField('Assignment Title', [non_empty])
+   store_key = StringField('Persistent Key for Entry (suffix and ID)', [validators.Required(), validate_suffix])
+   hash_key = StringField('Entry Key', [validators.Optional(), editable])
+   hash_value = StringField('Entry Value')
+
+class AddForm(Form):
+   pass
+
+class EditForm(Form):
+   pass

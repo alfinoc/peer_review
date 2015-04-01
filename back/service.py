@@ -31,14 +31,17 @@ class PeerReviewService(object):
       if not self.store.isInstructor(request.user):
          return Unauthorized('Sign in as an instructor to edit surveys.')
 
-      if request.method != 'POST':
+      if request.method != 'GET':  # TODO:change back
          return BadRequest('POST request required')
 
       # Validate
-      form = forms.EditAssignmentForm(request.form)
+      form = forms.ChangeForm(request.args)  #TODO: change back
       if not form.validate():
          return BadRequest(form.errors);
+      return Response(str(form))
 
+
+      """
       # Store assignment
       assignment = model.Assignment(form.title.data)
       assignment.setId(form.revision_id.data)
@@ -56,6 +59,7 @@ class PeerReviewService(object):
          questions.append(q.getId())
 
       return Response('Successfully updated assignment %d.' % assignment.getId())
+      """
 
    def get_survey_submit(self, request):
       args = request.form
@@ -75,7 +79,6 @@ class PeerReviewService(object):
 
    def get_survey(self, request):
       missing = missingParams(request.args, ['assignment'])
-      print missing
       if missing != None:
          return missing
 
@@ -108,7 +111,6 @@ class PeerReviewService(object):
       if self.store.isInstructor(request.user):
          assignments = self.store.getAllAssignments()
          for a in assignments:
-            print a.questions
             a.questions = map(self.store.getQuestion, loads(a.questions))
          return self.render('prof_dashboard.html', assignments=assignments)
       else:
