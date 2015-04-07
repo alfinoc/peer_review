@@ -31,7 +31,7 @@ def validate_suffix(form, storeKey):
 def editable(form, hashKey):
    validate_suffix(form, form.store_key)
    legal = LEGAL_EDITS[suffix(form.store_key.data)]
-   if form.hashKey.data not in legal:
+   if hashKey.data not in legal:
       raise ValidationError('must be one of {0}.'.format(legal))
 
 # Avoids error iff field's data is not empty or all whitespace.
@@ -40,7 +40,8 @@ def non_empty(form, field):
       raise ValidationError('must be non-empty')
 
 class ChangeForm(Form):
-   store_key = StringField('Persistent Key for Entry (suffix and ID)', [validators.Required(), validate_suffix])
+   store_key = StringField('Persistent Key for Entry (suffix and ID)',
+                           [validators.Required(), validate_suffix])
    hash_key = StringField('Entry Key', [validators.Required(), editable])
    hash_value = StringField('Entry Value', [validators.Required()])
 

@@ -46,19 +46,22 @@ class RedisStore:
          return pwd_context.verify(password, self.store.hget(key, 'password'))
       return False
 
+   # Setters/adders.
    def addCourse(self, course):
       self._addNewEntry(course)
       self.store.rpush('all_courses', course.getId())
 
-   def addAssignment(self, course, assignment):
+   def addAssignment(self, assignment, course=None):
+      course = course or self._getEntry(Course, assignment.parent())
       self._registerEntry(course, assignment, 'assignments')
 
-   def addQuestion(self, assignment, question):
+   def addQuestion(self, question, assignment=None):
       self._registerEntry(assignment, question, 'questions')
 
-   def addAnswer(self, question, answer):
+   def addAnswer(self, answer, question=None):
       self._registerEntry(question, answer, 'answers')
 
+   # Getters.
    def getCourse(self, id):
       return self._getEntry(Course, id)
 
@@ -77,18 +80,15 @@ class RedisStore:
          id = int(id)
       except:
          raise ValueError('illegal key format')
-      # TODO: issue is that setting a revision really shouldn't require that you
-      # given the name of the parent. should be able to just add without a parent.
-      # sort of thinking you should provide a revise(id) interface to keep things clear
       get, set = self._accessors(suffix)
       return (partial(get, id), partial(set, id))
 
    def _accessors(self, suffix):
       accessors = {
-         model.Course.typeSuffix: (self.getCourse, self.addCourse),
-         model.Assignment.typeSuffix: (self.getAssignment, self.addAssignment),
-         model.Question.typeSuffix: (self.getQuestion, self.addQuestion),
-         model.Answer.typeSuffix: (self.getAnswer, self.addAnswer)
+         Course.typeSuffix: (self.getCourse, self.addCourse),
+         Assignment.typeSuffix: (self.getAssignment, self.addAssignment),
+         Question.typeSuffix: (self.getQuestion, self.addQuestion),
+         Answer.typeSuffix: (self.getAnswer, self.addAnswer)
       }
       if suffix not in accessors:
          raise ValueError('unknown suffix')
@@ -114,41 +114,43 @@ class RedisStore:
       else:
          return None
 
-   # Stores both entries if they aren't stored already, and pushes childEntry's id
-   # to the list in parentEntry's hash keyed on parentListKey.
+   # Adds the new 'childEntry'. 'parentEntry' should be already stored. parent is
+   # recorded in child hash, and child id is pushed to the child list at key
+   # 'parentListKey' on the parent.
+   # Raises ValueError if 'parentEntry' is not stored.
    def _registerEntry(self, parentEntry, childEntry, parentListKey):
       if parentEntry.getId() == None:
          raise ValueError('Parent entry (%s) not stored.' % str(type(parentEntry)))      
-      initialID = childEntry.getId()
-      self._storeEntry(childEntry)
-      if initialID == None:
-         childEntry.setParentKey(parentEntry.key())
-         self._pushToHashList(parentEntry.key(), parentListKey, childEntry.getId())
 
-   def _storeEntry(self, entry):
-      if entry.getId() == None:
-         self._addNewEntry(entry)
-      else:
-         # An entry with the current ID exists, so make a revision. Store
-         # the revision predecessor and guarantee that the current ID now
-         # refers to the new entry (argument).
-         if not self.store.exists(entry.key()):
-            raise ValueError('%s entry (%d) not stored.' % (r.suffix(), r.getId()))
-         suffix = entry.suffix()
+      childEntry.setParentKey(parentEntry.key())
+      self._addNewEntry(childEntry)
+      self._pushToHashList(parentEntry.key(), parentListKey, childEntry.getId())
 
-         # Generate a new ID setup for the currently stored version of entry.
-         newId = self._getNewId(suffix)
-         newKey = _suffix(newId, suffix)
-         entry.setRevisionPredecessor(newId)
-         newHash = entry.hash()
+   # Records the entry as a revision with the same id given in 'entry'. The old
+   # entry previously corresponding to 'entry's id is given a new id which is stored
+   # in 'entry's revision precedessor field.
+   # Raises ValueError if 'entry' is not stored.
+   def reviseEntry(self, entry):
+      # An entry with the current ID exists, so make a revision. Store
+      # the revision predecessor and guarantee that the current ID now
+      # refers to the new entry (argument).
+      if not self.store.exists(entry.key()):
+         raise ValueError('%s entry (%d) not stored.' % (r.suffix(), r.getId()))
+      suffix = entry.suffix()
 
-         # Gather old ID setup to associate with entry.
-         oldId = entry.getId()
-         oldKey = entry.key();
-         oldHash = self.store.hgetall(oldKey)
+      # Generate a new ID setup for the currently stored version of entry.
+      newId = self._getNewId(suffix)
+      newKey = _suffix(newId, suffix)
+      entry.setRevisionPredecessor(newId)
+      newHash = entry.hash()
 
-         self.store.hmset(oldKey, newHash)
-         self.store.hmset(newKey, oldHash)
+      # Gather old ID setup to associate with entry.
+      oldId = entry.getId()
+      oldKey = entry.key();
+      oldHash = self.store.hgetall(oldKey)
+
+      self.store.hmset(oldKey, newHash)
+      self.store.hmset(newKey, oldHash)
 
    def _pushToHashList(self, hashKey, listKey, value):
       prev = loads(self.store.hget(hashKey, listKey))

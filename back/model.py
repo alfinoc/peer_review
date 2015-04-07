@@ -5,14 +5,16 @@ def _suffix(s, suffix):
 
 class StoreEntry:
    typeSuffix = None
+   noneAble = ['parent', 'last']
 
    def __init__(self):
       self.id = None
       self._serializable = []
-      self.addSerialProperty('parent', None)
-      self.addSerialProperty('last', None)
+      for key in self.noneAble:
+         self.addSerialProperty(key, None)
 
    def setParentKey(self, key):
+      print key
       self.parent = key
 
    def setRevisionPredecessor(self, id):
@@ -48,6 +50,9 @@ class StoreEntry:
       return _suffix(self.id, self.typeSuffix)
 
    def loadHash(self, hash):
+      for key in self.noneAble:
+         if hash[key] == 'None':
+            hash[key] = None
       for key in hash:
          self.addSerialProperty(key, hash[key])
       return self

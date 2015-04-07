@@ -26,10 +26,10 @@ def subset(dict, keys):
    return res
 
 class PeerReviewService(object):
-   def get_survey_edit(self, request):
+   def get_change(self, request):
       # Authenticate
       if not self.store.isInstructor(request.user):
-         return Unauthorized('Sign in as an instructor to edit surveys.')
+         return Unauthorized('Sign in as an instructor to edit survey details.')
 
       if request.method != 'GET':  # TODO:change back
          return BadRequest('POST request required')
@@ -44,7 +44,7 @@ class PeerReviewService(object):
       # Change hash_key's value and store the revision.
       key = form.hash_key.data
       value = form.hash_value.data
-      get, set = self.store.guessAccessors(key)
+      get, set = self.store.guessAccessors(form.store_key.data)
       # TODO: a bunch
       # get previous entry
       if key != None:
