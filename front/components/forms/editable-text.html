@@ -1,4 +1,6 @@
 <link rel="import" href="/components/standard/core-ajax/core-ajax.html">
+<link rel="import" href="/components/standard/paper-toast/paper-toast.html">
+<link rel="import" href="/components/standard/paper-progress/paper-progress.html">
 
 <polymer-element name="editable-text">
    <template>
@@ -12,11 +14,15 @@
          </div>
       </div>
       <template if="{{ storeKey }}">
-         <core-ajax
-            url="http://localhost:5000/store/set"
-            params='{ "" }'
+         <core-ajax id="ajax"
+            url="http://localhost:5000/change"
+            on-core-response="{{ checkAsync }}"
+            on-core-error="{{ error }}"
+            loading="{{ loading }}"
          ></core-ajax>
       </template>
+      <paper-toast id="toast" text="Saving error! Record your changes locally and contact Chris."></paper-toast>
+      <paper-progress indeterminate?="{{ loading }}"></paper-progress>
    </template>
       <script>
 
@@ -29,8 +35,10 @@ Polymer('editable-text', {
       },
       value: '',
       storeKey: '',
+      hashKey: '',
       lastSaved: '',
-      auto: false
+      auto: false,
+      loading: false
    },
 
    computed: {
@@ -52,7 +60,7 @@ Polymer('editable-text', {
    },
 
    unlock: function() {
-      if (!this.unlocked) {
+      if (!this.unlocked && !this.loading) {
          this.unlocked = true;
       }
    },
@@ -78,15 +86,25 @@ Polymer('editable-text', {
    },
 
    save: function() {
-      console.log('attempting save');
-      console.log('current value: ' + this.getValue());
-      if (this.storeKey) {
+      //this.unlocked = false;
+      console.log('Attempting save.');
+      if (this.storeKey && this.hashKey) {
+         this.$.ajax.params = JSON.stringify({
+            'store_key': this.storeKey,
+            'hash_key': this.hashKey,
+            'hash_value': this.getValue()
+         });
          this.$.ajax.go();
       }
    },
 
-   checkAsync: function() {
-      // if save goes wrong, report. else switch to saved state.
+   checkAsync: function(evt) {
+      this.lastSaved = evt.detail.response;
+   },
+
+   error: function(evt) {
+      console.log(evt.detail);
+      this.$.toast.show();
    },
 
    guardEmpty: function() {
@@ -99,7 +117,10 @@ Polymer('editable-text', {
    },
 
    fromHTML: function(html) {
-      return this.replaceAll(html, '<br>', '\n');
+
+      var res = this.replaceAll(html, '<br>', '\n');
+      res = this.replaceAll(res, '&nbsp;', ' ');
+      return res;
    },
 
    replaceAll: function(str, find, replace) {

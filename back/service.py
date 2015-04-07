@@ -10,8 +10,6 @@ from session import SessionRequest
 import forms
 import model
 
-import inspect
-
 def missingParams(actual, required):
    notFound = filter(lambda p : not p in actual, required)
    if len(notFound) > 0:
@@ -47,8 +45,8 @@ class PeerReviewService(object):
       entry = self.store.getAgnostic(form.store_key.data)()
       if key != None:
          entry[key] = value
-      self.reviseEntry(entry)
-      return Response('Successfully revised {0}.'.format(entry.getId()))
+      self.store.reviseEntry(entry)
+      return Response(str(value))
 
    def get_survey_submit(self, request):
       args = request.form
@@ -130,7 +128,7 @@ class PeerReviewService(object):
 
    def __init__(self, template_path):
       self.url_map = Map([
-         Rule('/survey/edit', endpoint="survey_edit"),
+         Rule('/change', endpoint="change"),
          Rule('/survey/submit', endpoint="survey_submit"),
          Rule('/dashboard', endpoint='dashboard'),
          Rule('/survey', endpoint='survey'),

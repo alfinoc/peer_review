@@ -4,7 +4,7 @@ import model
 
 LEGAL_EDITS = {
    'asst': ['title'],
-   'quest': ['title'],
+   'quest': ['prompt'],
    'course': ['title'],
 }
 

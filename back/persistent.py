@@ -80,7 +80,7 @@ class RedisStore:
          id = int(id)
       except:
          raise ValueError('illegal key format')
-      return partial(self._accessors(suffix), id)
+      return partial(self._getter(suffix), id)
 
    def _getter(self, suffix):
       getters = {
