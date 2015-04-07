@@ -21,7 +21,10 @@ Polymer('prof-dashboard', {
          var elt = asst['element'];
          var questions = elt.querySelectorAll('question').array();
          asst['questions'] = questions.map(function(question) {
-            return question.innerHTML;
+            return {
+               revision: question.getAttribute('revision'),
+               prompt: question.innerHTML
+            };
          });
       });
 

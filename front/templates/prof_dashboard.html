@@ -15,9 +15,9 @@
 <body>
    <prof-dashboard>
       {% for a in assignments %}
-         <assignment name="{{ a.title }}" revision="{{ a.id }}">
+         <assignment name="{{ a.title }}" revision="{{ a.key() }}">
             {% for q in a.questions %}
-               <question revision="{{ q.id }}">{{ q.prompt }}</question>
+               <question revision="{{ q.key() }}">{{ q.prompt }}</question>
             {% endfor %}
          </assignment>
       {% endfor %}

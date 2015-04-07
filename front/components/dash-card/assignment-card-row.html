@@ -27,7 +27,7 @@
          <template if="{{ questions && questions.length > 0 }}">
             <ol>
                <template repeat="{{ q in questions }}">
-                  <li><editable-text value="{{ q }}" storeKey="{{ q.storeKey }}"></editable-text></li>
+                  <li><editable-text value="{{ q.prompt }}" storeKey="{{ q.revision }}"></editable-text></li>
                </template>
             </ol>
          </template>

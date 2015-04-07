@@ -73,14 +73,13 @@ class PeerReviewService(object):
 
       # TODO: check auth and assigned
 
-      def getQuestionWithKey(questionKey):
+      def getQuestion(questionKey):
          dict = self.store.getQuestion(questionKey)
-         dict['key'] = questionKey
          return dict
 
       # Get assignment information.
       assignment = self.store.getAssignment(request.args['assignment'])
-      questions = map(getQuestionWithKey, loads(assignment['questions']))
+      questions = map(getQuestion, loads(assignment['questions']))
 
       # Get course information if requested.
       course = ''
