@@ -44,32 +44,11 @@ class PeerReviewService(object):
       # Change hash_key's value and store the revision.
       key = form.hash_key.data
       value = form.hash_value.data
-      get, set = self.store.guessAccessors(form.store_key.data)
-      # TODO: a bunch
-      # get previous entry
+      entry = self.store.getAgnostic(form.store_key.data)()
       if key != None:
          entry[key] = value
-      # set revision
-
-      """
-      # Store assignment
-      assignment = model.Assignment(form.title.data)
-      assignment.setId(form.revision_id.data)
-
-      # If we're about to store a revision, verify that the ID is valid.
-      if assignment.getId() != None and not assignment.key() in self.store:
-         return BadRequest('Unknown assignment key ' + assignment.key())
-      self.store.addAssignment(self.store.getCourse(1), assignment)
-
-      # Store all questions
-      questions = []
-      for prompt in loads(form.questions.data):
-         q = model.Question(prompt)
-         self.store.addQuestion(assignment, q)
-         questions.append(q.getId())
-
-      return Response('Successfully updated assignment %d.' % assignment.getId())
-      """
+      self.reviseEntry(entry)
+      return Response('Successfully revised {0}.'.format(entry.getId()))
 
    def get_survey_submit(self, request):
       args = request.form

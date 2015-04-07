@@ -14,7 +14,6 @@ class StoreEntry:
          self.addSerialProperty(key, None)
 
    def setParentKey(self, key):
-      print key
       self.parent = key
 
    def setRevisionPredecessor(self, id):

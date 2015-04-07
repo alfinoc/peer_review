@@ -74,25 +74,24 @@ class RedisStore:
    def getAnswer(self, id):
       return self._getEntry(Answer, id)
 
-   def guessAccessors(self, key):
+   def getAgnostic(self, key):
       try:
          id, suffix = key.split(':')
          id = int(id)
       except:
          raise ValueError('illegal key format')
-      get, set = self._accessors(suffix)
-      return (partial(get, id), partial(set, id))
+      return partial(self._accessors(suffix), id)
 
-   def _accessors(self, suffix):
-      accessors = {
-         Course.typeSuffix: (self.getCourse, self.addCourse),
-         Assignment.typeSuffix: (self.getAssignment, self.addAssignment),
-         Question.typeSuffix: (self.getQuestion, self.addQuestion),
-         Answer.typeSuffix: (self.getAnswer, self.addAnswer)
+   def _getter(self, suffix):
+      getters = {
+         Course.typeSuffix: self.getCourse,
+         Assignment.typeSuffix: self.getAssignment,
+         Question.typeSuffix: self.getQuestion,
+         Answer.typeSuffix: self.getAnswer
       }
-      if suffix not in accessors:
+      if suffix not in getters:
          raise ValueError('unknown suffix')
-      return accessors[suffix]
+      return getters[suffix]
 
    def getAllCourses(self):
       return map(self.getCourse, self.store.lrange('all_courses', 0, -1))
