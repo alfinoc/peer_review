@@ -85,6 +85,10 @@ Polymer('editable-text', {
       }
    },
 
+   unsavedChanged: function() {
+      if (this.unsaved) this.fire('unsaved');
+   },
+
    save: function() {
       //this.unlocked = false;
       console.log('Attempting save.');

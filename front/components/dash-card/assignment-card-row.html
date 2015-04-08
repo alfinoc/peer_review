@@ -15,15 +15,28 @@
       <link rel="stylesheet" type="text/css" href="assignment-card-row.css">
       <!-- Title and control buttons. -->
       <div layout horizontal>
-         <paper-icon-button id="edit" class="hide" icon="editor:mode-edit" on-click="{{ edit }}" noink></paper-icon-button>
+         <paper-icon-button id="edit" noink
+            hide?="{{ !open }}"
+            icon="editor:mode-edit"
+            on-click="{{ edit }}"></paper-icon-button>
          <div class="clickable" on-click="{{ toggleCollapseSection }}" flex self-center>
             {{ name || 'Untitled' }}
          </div>
-         <paper-icon-button id="save" class="hide" icon="save" on-click="{{ saveQuestions }}" noink></paper-icon-button>
+         <paper-icon-button id="save" class="hide" mininoink
+            icon="save"
+            on-click="{{ saveQuestions }}"></paper-icon-button>
+         <paper-icon-button id="add" mini noink
+            hide?="{{ !open }}"
+            icon="add"
+            on-click="{{ pushQuestion }}"></paper-icon-button>
+         <paper-icon-button id="remove" mini noink
+            hide?="{{ !open }}"
+            icon="remove"
+            on-click="{{ popQuestion }}"></paper-icon-button>
       </div>
 
       <!-- Question list. -->
-      <core-collapse id="collapse">
+      <core-collapse id="collapse" opened="{{ open }}">
          <template if="{{ questions && questions.length > 0 }}">
             <ol>
                <template repeat="{{ q in questions }}">
@@ -31,7 +44,8 @@
                      <editable-text
                         value="{{ q.prompt }}"
                         storeKey="{{ q.revision }}"
-                        hashKey="prompt">
+                        hashKey="prompt"
+                        on-unsaved="{{ showSaveButton }}">
                      </editable-text>
                   </li>
                </template>
@@ -58,16 +72,26 @@ Polymer('assignment-card-row', {
    publish: {
       'storeKey': null,
       'name': '',
-      'questions': []
+      'questions': [],
+      'open': false
    },
 
    created: function() {
       this.questions = [];
    },
 
+   domReady: function() {
+      this.hideSaveButton();
+   },
+
    saveQuestions: function() {
-      this.querySelectorAll('* /deep/ editable-text').array().forEach(function(q) {
-         if (q.unsaved) q.save();
+      this.hideSaveButton();
+      this.editables().forEach(function(q) {
+         if (!q.revision) {
+
+         }
+         if (q.unsaved)
+            q.save();
       });
    },
 
@@ -75,21 +99,36 @@ Polymer('assignment-card-row', {
       this.$.editform.open();
    },
 
-   delete: function() {
+   showSaveButton: function() {
+      this.$.save.classList.remove('hide');
+   },
 
+   hideSaveButton: function() {
+      this.$.save.classList.add('hide');
+   },
+
+   pushQuestion: function() {
+      this.questions.push({ prompt: '' });
+   },
+
+   popQuestion: function() {
+      if (this.questions.length <= 1)
+         return;
+      var last = this.questions[this.questions.length - 1];
+      if (!last.prompt.trim())
+         this.questions.pop();
+   },
+
+   delete: function() {
+      console.log('unimplemented!');
    },
 
    toggleCollapseSection: function(evt) {
-      var editButton = this.$.edit;
-      var saveButton = this.$.save;
       this.$.collapse.toggle();
-      if (this.$.collapse.opened) {
-         editButton.classList.remove('hide');
-         saveButton.classList.remove('hide');
-      } else {
-         editButton.classList.add('hide');
-         saveButton.classList.add('hide');
-      }
+   },
+
+   editables: function() {
+      return this.querySelectorAll('* /deep/ editable-text').array();
    }
 });
 

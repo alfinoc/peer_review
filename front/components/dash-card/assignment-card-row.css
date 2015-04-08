@@ -24,17 +24,25 @@ paper-radio-button::shadow #onRadio {
    color: white;
 }
 
-#save:hover {
-   color: #424242;
+#save:hover, #add:hover, #remove:hover {
+   color: #2196F3;
 }
 
-#edit, #save {
+#edit {
    color: #2196F3;
+}
+
+#save, #add, #remove {
+   color: #424242;
+   margin-left: 5px;
+}
+
+#edit, #save, #add, #remove {
    padding: 0px;
    transition: color ease-in-out 0.2s;
 }
 
-.hide {
+.hide, *[hide] {
    display: none;
 }
 
