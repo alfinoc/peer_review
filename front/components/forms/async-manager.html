@@ -33,7 +33,7 @@ Polymer('async-manager', {
    },
 
    addAssignment: function(courseKey, title) {
-      this.setURL('add');
+      this.setURL('add/assignment');
       this.$.ajax.params = JSON.stringify({
          'parent': courseKey,
          'title': title
@@ -42,16 +42,16 @@ Polymer('async-manager', {
    },
 
    addQuestions: function(assignmentKey, prompts) {
-      this.setURL('add');
+      this.setURL('add/questions');
       this.$.ajax.params = JSON.stringify({
          'parent': assignmentKey,
-         'prompts': prompts,
+         'prompts': JSON.stringify(prompts),
       });
       this.sendRequest();
    },
 
    addCourse: function(parentKey, shortName, longName) {
-      this.setURL('add');
+      this.setURL('add/course');
       this.$.ajax.params = JSON.stringify({
          'parent': parentKey,
          'shortname': shortName,

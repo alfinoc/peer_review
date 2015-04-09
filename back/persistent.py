@@ -46,19 +46,18 @@ class RedisStore:
          return pwd_context.verify(password, self.store.hget(key, 'password'))
       return False
 
-   # Setters/adders.
+   # Adders.
    def addCourse(self, course):
       self._addNewEntry(course)
       self.store.rpush('all_courses', course.getId())
 
-   def addAssignment(self, assignment, course=None):
-      course = course or self._getEntry(Course, assignment.parent())
+   def addAssignment(self, assignment, course):
       self._registerEntry(course, assignment, 'assignments')
 
-   def addQuestion(self, question, assignment=None):
+   def addQuestion(self, question, assignment):
       self._registerEntry(assignment, question, 'questions')
 
-   def addAnswer(self, answer, question=None):
+   def addAnswer(self, answer, question):
       self._registerEntry(question, answer, 'answers')
 
    # Getters.
@@ -93,6 +92,32 @@ class RedisStore:
          raise ValueError('unknown suffix')
       return getters[suffix]
 
+   # Records the entry as a revision with the same id given in 'entry'. The old
+   # entry previously corresponding to 'entry's id is given a new id which is stored
+   # in 'entry's revision precedessor field.
+   # Raises ValueError if 'entry' is not stored.
+   def reviseEntry(self, entry):
+      # An entry with the current ID exists, so make a revision. Store
+      # the revision predecessor and guarantee that the current ID now
+      # refers to the new entry (argument).
+      if not self.store.exists(entry.key()):
+         raise ValueError('%s entry (%d) not stored.' % (r.suffix(), r.getId()))
+      suffix = entry.suffix()
+
+      # Generate a new ID setup for the currently stored version of entry.
+      newId = self._getNewId(suffix)
+      newKey = _suffix(newId, suffix)
+      entry.setRevisionPredecessor(newId)
+      newHash = entry.hash()
+
+      # Gather old ID setup to associate with entry.
+      oldId = entry.getId()
+      oldKey = entry.key();
+      oldHash = self.store.hgetall(oldKey)
+
+      self.store.hmset(oldKey, newHash)
+      self.store.hmset(newKey, oldHash)
+
    def getAllCourses(self):
       return map(self.getCourse, self.store.lrange('all_courses', 0, -1))
 
@@ -124,32 +149,6 @@ class RedisStore:
       childEntry.setParentKey(parentEntry.key())
       self._addNewEntry(childEntry)
       self._pushToHashList(parentEntry.key(), parentListKey, childEntry.getId())
-
-   # Records the entry as a revision with the same id given in 'entry'. The old
-   # entry previously corresponding to 'entry's id is given a new id which is stored
-   # in 'entry's revision precedessor field.
-   # Raises ValueError if 'entry' is not stored.
-   def reviseEntry(self, entry):
-      # An entry with the current ID exists, so make a revision. Store
-      # the revision predecessor and guarantee that the current ID now
-      # refers to the new entry (argument).
-      if not self.store.exists(entry.key()):
-         raise ValueError('%s entry (%d) not stored.' % (r.suffix(), r.getId()))
-      suffix = entry.suffix()
-
-      # Generate a new ID setup for the currently stored version of entry.
-      newId = self._getNewId(suffix)
-      newKey = _suffix(newId, suffix)
-      entry.setRevisionPredecessor(newId)
-      newHash = entry.hash()
-
-      # Gather old ID setup to associate with entry.
-      oldId = entry.getId()
-      oldKey = entry.key();
-      oldHash = self.store.hgetall(oldKey)
-
-      self.store.hmset(oldKey, newHash)
-      self.store.hmset(newKey, oldHash)
 
    def _pushToHashList(self, hashKey, listKey, value):
       prev = loads(self.store.hget(hashKey, listKey))

@@ -24,13 +24,48 @@ def subset(dict, keys):
    return res
 
 class PeerReviewService(object):
-   def get_add(self, request):
+   def get_add_course(self, request):
+      return Response(dumps({
+         'new': {}
+      }))
+
+   def get_add_assignment(self, request):
+      args = request.args
+      missing = missingParams(args, ['parent', 'title'])
+      if missing != None:
+         return missing
+      course = args['parent']
+      if course not in self.store:
+         return BadRequest('unknown parent key')
+      a = model.Assignment(args['title'])
+      self.store.addAssignment(a, self.store.getAgnostic(course)())
       return Response(dumps({
          'new': {
-            'name': 'a new one!',
-            'questions': [],
-            'revision': '1000:asst'
+            'name': a.title,
+            'questions': a.questions,
+            'revision': a.key()
          }
+      }))
+
+   def get_add_questions(self, request):
+      args = request.args
+      missing = missingParams(args, ['parent', 'prompts'])
+      if missing != None:
+         return missing
+      if args['parent'] not in self.store:
+         return BadRequest('unknown parent key')
+      asst = self.store.getAgnostic(args['parent'])()
+      try:
+         prompts = loads(args['prompts'])
+      except:
+         return BadRequest('malformed JSON prompts')
+      newQs = []
+      for p in prompts:
+         q = model.Question(p)
+         self.store.addQuestion(q, asst)
+         newQs.append(q)
+      return Response(dumps({
+         'new': map(lambda q : { 'revision': q.key(), 'prompt': q.prompt }, newQs)
       }))
 
    def get_remove(self, request):
@@ -140,7 +175,9 @@ class PeerReviewService(object):
 
    def __init__(self, template_path):
       self.url_map = Map([
-         Rule('/add', endpoint="add"),
+         Rule('/add/course', endpoint="add_course"),
+         Rule('/add/assignment', endpoint="add_assignment"),
+         Rule('/add/questions', endpoint="add_questions"),
          Rule('/revise', endpoint="revise"),
          Rule('/survey/submit', endpoint="survey_submit"),
          Rule('/dashboard', endpoint='dashboard'),

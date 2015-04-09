@@ -9,6 +9,7 @@
 <link rel="import" href="/components/standard/paper-input/paper-input.html">
 
 <link rel="import" href="/components/forms/editable-text.html">
+<link rel="import" href="/components/forms/async-manager.html">
 
 <polymer-element name="assignment-card-row">
    <template>
@@ -60,11 +61,15 @@
             <paper-button dismissive class="delete" self-center>Delete</paper-button>
          </div>
          <div layout vertical class="form">
-            <paper-input floatinglabel label="Title" value="{{ name }}"></paper-input>
+            <paper-input id="newtitle" floatinglabel label="Title">
+            </paper-input>
          </div>
          <paper-button dismissive>Cancel</paper-button>
-         <paper-button affirmative on-click="{{ saveForm }}">Save</paper-button>
+         <paper-button affirmative on-click="{{ saveAssignment }}">Save</paper-button>
       </paper-action-dialog>
+
+      <async-manager id="areviser" success="{{ saveAssignmentCB | bindThis }}"></async-manager>
+      <async-manager id="qadder" success="{{ addQuestionsCB | bindThis }}"></async-manager>
    </template>
       <script>
 
@@ -82,14 +87,38 @@ Polymer('assignment-card-row', {
 
    domReady: function() {
       this.hideSaveButton();
+      this.$.newtitle.value = this.name;
    },
 
    saveQuestions: function() {
       this.hideSaveButton();
+      var newQuestions = [];
       this.editables().forEach(function(q) {
-         if (q.unsaved && q.storeKey)
+         if (!q.storeKey)
+            newQuestions.push(q.getValue());
+         else if (q.unsaved)
             q.save();
       });
+      if (newQuestions.length > 0)
+         this.$.qadder.addQuestions(this.storeKey, newQuestions);
+   },
+
+   addQuestionsCB: function(evt) {
+      var saved = this.questions.filter(function(q) {
+         return q.storeKey;
+      });
+      evt.detail.response['new'].forEach(function(q) {
+         saved.push(q);
+      });
+      this.questions = saved;
+   },
+
+   saveAssignment: function() {
+      this.$.areviser.revise(this.storeKey, 'title', this.$.newtitle.value);
+   },
+
+   saveAssignmentCB: function(evt) {
+      this.name = evt.detail.response['new'];
    },
 
    edit: function() {
@@ -105,12 +134,14 @@ Polymer('assignment-card-row', {
    },
 
    pushQuestion: function() {
+      this.showSaveButton();
       this.questions.push({ prompt: '' });
    },
 
    popQuestion: function() {
       if (this.questions.length <= 1)
          return;
+      this.showSaveButton();
       var last = this.questions[this.questions.length - 1];
       if (!last.prompt.trim())
          this.questions.pop();
@@ -126,6 +157,10 @@ Polymer('assignment-card-row', {
 
    editables: function() {
       return this.querySelectorAll('* /deep/ editable-text').array();
+   },
+
+   bindThis: function(fn) {
+      return fn.bind(this);
    }
 });
 
