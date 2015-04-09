@@ -24,7 +24,19 @@ def subset(dict, keys):
    return res
 
 class PeerReviewService(object):
-   def get_change(self, request):
+   def get_add(self, request):
+      return Response(dumps({
+         'new': {
+            'name': 'a new one!',
+            'questions': [],
+            'revision': '1000:asst'
+         }
+      }))
+
+   def get_remove(self, request):
+      return Response('yeah, you betcha')
+
+   def get_revise(self, request):
       # Authenticate
       if not self.store.isInstructor(request.user):
          return Unauthorized('Sign in as an instructor to edit survey details.')
@@ -128,7 +140,8 @@ class PeerReviewService(object):
 
    def __init__(self, template_path):
       self.url_map = Map([
-         Rule('/change', endpoint="change"),
+         Rule('/add', endpoint="add"),
+         Rule('/revise', endpoint="revise"),
          Rule('/survey/submit', endpoint="survey_submit"),
          Rule('/dashboard', endpoint='dashboard'),
          Rule('/survey', endpoint='survey'),

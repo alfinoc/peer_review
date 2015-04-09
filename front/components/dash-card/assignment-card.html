@@ -8,6 +8,7 @@
 <link rel="import" href="/components/standard/paper-input/paper-input.html">
 
 <link rel="import" href="/components/dash-card/assignment-card-row.html">
+<link rel="import" href="/components/forms/async-manager.html">
 
 <polymer-element name="assignment-card">
    <template>
@@ -15,7 +16,9 @@
       <!-- Card header. -->
       <h1 layout horizontal>
          <span flex self-center>Assignments</span>
-         <paper-fab self-center class="headerbutton" icon="add" mini on-click="{{ addAssignment }}"></paper-fab>
+         <paper-fab class="headerbutton" mini self-center 
+            icon="add"
+            on-click="{{ showDialog }}"></paper-fab>
       </h1>
       <div class="content">
          <ul class="toplevel">
@@ -29,6 +32,29 @@
                </li>
             </template>
          </ul>
+      </div>
+      <!-- Assignment edit dialog. -->
+      <paper-action-dialog id="addform" backdrop>
+         <div layout horizontal>
+            <h1 flex>Add Assignment</h1>
+         </div>
+         <div layout vertical class="form">
+            <select id="newassignmentcourse">
+               <option>CSE 142</option>
+               <option>PHIL 101</option>
+               <option>MATH 480</option>
+            </select>
+            <paper-input id="newassignmenttitle"
+               floatinglabel
+               label="Title"
+               value="{{ name }}">
+            </paper-input>
+         </div>
+         <paper-button dismissive>Cancel</paper-button>
+         <paper-button affirmative on-click="{{ addAssignment }}">Save</paper-button>
+      </paper-action-dialog>
+
+      <async-manager id="ajax" success="{{ addAssignmentCB | bindThis }}"></async-manager>
    </template>
       <script>
 
@@ -41,9 +67,24 @@ Polymer('assignment-card', {
       this.assignments = [];
    },
 
-   addAssignment: function() {
-      this.$.add.toggle();
+   showDialog: function() {
+      this.$.addform.toggle();
    },
+
+   addAssignment: function() {
+      var course = this.$.newassignmentcourse.value;
+      var title = this.$.newassignmenttitle.value;
+      this.$.ajax.addAssignment(course, title);
+   },
+
+   addAssignmentCB: function(evt) {
+      console.log(evt.detail.response['new']);
+      this.assignments.push(evt.detail.response['new']);
+   },
+
+   bindThis: function(fn) {
+      return fn.bind(this);
+   }
 });
 
    </script>

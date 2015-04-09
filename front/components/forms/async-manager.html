@@ -1,0 +1,83 @@
+<link rel="import" href="/components/standard/core-ajax/core-ajax.html">
+<link rel="import" href="/components/standard/paper-toast/paper-toast.html">
+
+<polymer-element name="async-manager">
+   <template>
+      <core-ajax id="ajax"
+         handleAs="json"
+         on-core-response="{{ success }}"
+         on-core-error="{{ error }}"
+         loading="{{ loading }}">
+      </core-ajax>
+      <paper-toast id="toast"
+         text="Server error! Record your changes locally and contact Chris.">
+      </paper-toast>
+   </template>
+      <script>
+
+Polymer('async-manager', {
+   publish: {
+      success: null,
+      loading: false,
+      base: 'http://localhost:5000/'
+   },
+
+   revise: function(storeKey, hashKey, value) {
+      this.setURL('revise');
+      this.$.ajax.params = JSON.stringify({
+         'store_key': storeKey,
+         'hash_key': hashKey,
+         'hash_value': value
+      });
+      this.sendRequest();
+   },
+
+   addAssignment: function(courseKey, title) {
+      this.setURL('add');
+      this.$.ajax.params = JSON.stringify({
+         'parent': courseKey,
+         'title': title
+      });
+      this.sendRequest();
+   },
+
+   addQuestions: function(assignmentKey, prompts) {
+      this.setURL('add');
+      this.$.ajax.params = JSON.stringify({
+         'parent': assignmentKey,
+         'prompts': prompts,
+      });
+      this.sendRequest();
+   },
+
+   addCourse: function(parentKey, shortName, longName) {
+      this.setURL('add');
+      this.$.ajax.params = JSON.stringify({
+         'parent': parentKey,
+         'shortname': shortName,
+         'longname': longName
+      });
+      this.sendRequest();
+   },
+
+   remove: function() {
+      this.setURL('remove');
+      this.sendRequest();
+   },
+
+   setURL: function(type) {
+      this.$.ajax.url = this.base + type;
+   },
+
+   error: function() {
+      // TODO: log more error information here
+      this.$.toast.show();
+   },
+
+   sendRequest: function() {
+      this.$.ajax.go();
+   }
+});
+
+   </script>
+</polymer-element>
