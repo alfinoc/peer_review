@@ -87,7 +87,7 @@ Polymer('assignment-card-row', {
    saveQuestions: function() {
       this.hideSaveButton();
       this.editables().forEach(function(q) {
-         if (q.unsaved && q.revision)
+         if (q.unsaved && q.storeKey)
             q.save();
       });
    },

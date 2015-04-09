@@ -58,7 +58,7 @@ class PeerReviewService(object):
       if key != None:
          entry[key] = value
       self.store.reviseEntry(entry)
-      return Response(str(value))
+      return Response(dumps({ 'new': str(value) }))
 
    def get_survey_submit(self, request):
       args = request.form

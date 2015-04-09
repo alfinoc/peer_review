@@ -2,6 +2,8 @@
 <link rel="import" href="/components/standard/paper-toast/paper-toast.html">
 <link rel="import" href="/components/standard/paper-progress/paper-progress.html">
 
+<link rel="import" href="/components/forms/async-manager.html">
+
 <polymer-element name="editable-text">
    <template>
       <link rel="stylesheet" type="text/css" href="editable-text.css">
@@ -13,15 +15,10 @@
          {{ lastSaved }}
          </div>
       </div>
-      <template if="{{ storeKey }}">
-         <core-ajax id="ajax"
-            url="http://localhost:5000/change"
-            on-core-response="{{ checkAsync }}"
-            on-core-error="{{ error }}"
-            loading="{{ loading }}"
-         ></core-ajax>
-      </template>
-      <paper-toast id="toast" text="Saving error! Record your changes locally and contact Chris."></paper-toast>
+      <async-manager id="ajax"
+         success="{{ checkAsync | bindThis }}"
+         loading="{{ loading }}">
+      </async-manager>
       <paper-progress indeterminate?="{{ loading }}"></paper-progress>
    </template>
       <script>
@@ -92,23 +89,12 @@ Polymer('editable-text', {
    save: function() {
       //this.unlocked = false;
       console.log('Attempting save.');
-      if (this.storeKey && this.hashKey) {
-         this.$.ajax.params = JSON.stringify({
-            'store_key': this.storeKey,
-            'hash_key': this.hashKey,
-            'hash_value': this.getValue()
-         });
-         this.$.ajax.go();
-      }
+      if (this.storeKey && this.hashKey)
+         this.$.ajax.revise(this.storeKey, this.hashKey, this.getValue());
    },
 
    checkAsync: function(evt) {
-      this.lastSaved = evt.detail.response;
-   },
-
-   error: function(evt) {
-      console.log(evt.detail);
-      this.$.toast.show();
+      this.lastSaved = evt.detail.response['new'];
    },
 
    guardEmpty: function() {
@@ -121,7 +107,6 @@ Polymer('editable-text', {
    },
 
    fromHTML: function(html) {
-
       var res = this.replaceAll(html, '<br>', '\n');
       res = this.replaceAll(res, '&nbsp;', ' ');
       return res;
@@ -132,6 +117,10 @@ Polymer('editable-text', {
          return s.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
       }
       return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+   },
+
+   bindThis: function(fn) {
+      return fn.bind(this);
    }
 });
 
