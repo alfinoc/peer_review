@@ -45,8 +45,16 @@ class ChangeForm(Form):
    hash_key = StringField('Entry Key', [validators.Required(), editable])
    hash_value = StringField('Entry Value', [validators.Required()])
 
-class AddForm(Form):
-   pass
+class AddAssignmentForm(Form):
+   parent_key = StringField('Key of parent store entry (suffix and ID).',
+                            [validators.Required()])
+   title = StringField('Title of the new assignment.', default='')
 
-class EditForm(Form):
+class AddQuestionsForm(Form):
+   parent_key = StringField('Key of parent store entry (suffix and ID).',
+                            [validators.Required()])
+   prompts = StringField('Title of the new assignment.', [jsonList])
+
+
+class RemoveForm(Form):
    pass

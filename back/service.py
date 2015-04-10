@@ -9,6 +9,7 @@ from json import loads, dumps
 from session import SessionRequest
 import forms
 import model
+import editor
 
 def missingParams(actual, required):
    notFound = filter(lambda p : not p in actual, required)
@@ -25,75 +26,38 @@ def subset(dict, keys):
 
 class PeerReviewService(object):
    def get_add_course(self, request):
-      return Response(dumps({
-         'new': {}
-      }))
+      return editor.add_course(request, self.store)
 
    def get_add_assignment(self, request):
-      args = request.args
-      missing = missingParams(args, ['parent', 'title'])
-      if missing != None:
-         return missing
-      course = args['parent']
-      if course not in self.store:
-         return BadRequest('unknown parent key')
-      a = model.Assignment(args['title'])
-      self.store.addAssignment(a, self.store.getAgnostic(course)())
-      return Response(dumps({
-         'new': {
-            'name': a.title,
-            'questions': a.questions,
-            'revision': a.key()
-         }
-      }))
+      self._authenticate_edit(request)
+      form = forms.AddAssignmentForm(request.args)
+      error = editor.validate_form(form, self.store, ['parent_key'])
+      if error: return BadRequest(error)
+      return editor.add_assignment(form.parent_key.data, form.title.data, self.store)
 
    def get_add_questions(self, request):
-      args = request.args
-      missing = missingParams(args, ['parent', 'prompts'])
-      if missing != None:
-         return missing
-      if args['parent'] not in self.store:
-         return BadRequest('unknown parent key')
-      asst = self.store.getAgnostic(args['parent'])()
-      try:
-         prompts = loads(args['prompts'])
-      except:
-         return BadRequest('malformed JSON prompts')
-      newQs = []
-      for p in prompts:
-         q = model.Question(p)
-         self.store.addQuestion(q, asst)
-         newQs.append(q)
-      return Response(dumps({
-         'new': map(lambda q : { 'revision': q.key(), 'prompt': q.prompt }, newQs)
-      }))
+      self._authenticate_edit(request)
+      form = forms.AddQuestionsForm(request.args)
+      error = editor.validate_form(form, self.store, ['parent_key'])
+      if error: return BadRequest(error)
+      return editor.add_questions(form.parent_key.data, loads(form.prompts.data), self.store)
 
    def get_remove(self, request):
-      return Response('yeah, you betcha')
+      return editor.remove(request, self.store)
 
    def get_revise(self, request):
-      # Authenticate
+      self._authenticate_edit(request)
+      form = forms.ChangeForm(request.args)  #TODO: change back
+      error = editor.validate_form(form, self.store, ['store_key'])
+      if error: return error
+      return editor.revise(form.store_key.data, form.hash_key.data, form.hash_value.data, self.store)
+
+   def _authenticate_edit(self, request):
       if not self.store.isInstructor(request.user):
          return Unauthorized('Sign in as an instructor to edit survey details.')
-
       if request.method != 'GET':  # TODO:change back
          return BadRequest('POST request required')
-
-      # Validate
-      form = forms.ChangeForm(request.args)  #TODO: change back
-      if not form.validate():
-         return BadRequest(form.errors);
-      if form.store_key.data not in self.store:
-         return BadRequest('unknown store_key')
-
-      # Change hash_key's value and store the revision.
-      key = form.hash_key.data
-      value = form.hash_value.data
-      entry = self.store.getAgnostic(form.store_key.data)()
-      if key != None:
-         entry[key] = value
-      self.store.reviseEntry(entry)
-      return Response(dumps({ 'new': str(value) }))
+      return None
 
    def get_survey_submit(self, request):
       args = request.form
