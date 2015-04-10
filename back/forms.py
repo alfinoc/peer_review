@@ -8,8 +8,9 @@ LEGAL_EDITS = {
    'course': ['title'],
 }
 
+# Avoids error if the field does not contain a properly formatted json list.
+# No constraints on list values.
 def jsonList(form, json):
-   print form, json
    try:
       parsed = loads(json.data)
    except:

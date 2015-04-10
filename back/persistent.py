@@ -73,6 +73,11 @@ class RedisStore:
    def getAnswer(self, id):
       return self._getEntry(Answer, id)
 
+   """
+   Returns the getter function (self.*) for the entry with given key. Returned
+   getter function takes no arguments.
+   Raises ValueError if the key format is illegal or contains an unknown suffix.
+   """
    def getAgnostic(self, key):
       try:
          id, suffix = key.split(':')
@@ -81,6 +86,10 @@ class RedisStore:
          raise ValueError('illegal key format')
       return partial(self._getter(suffix), id)
 
+   """
+   Returns the getter function (self.get*) for the type of entry with given suffix.
+   Raises ValueError if the suffix is unknown.
+   """
    def _getter(self, suffix):
       getters = {
          Course.typeSuffix: self.getCourse,
@@ -92,10 +101,12 @@ class RedisStore:
          raise ValueError('unknown suffix')
       return getters[suffix]
 
-   # Records the entry as a revision with the same id given in 'entry'. The old
-   # entry previously corresponding to 'entry's id is given a new id which is stored
-   # in 'entry's revision precedessor field.
-   # Raises ValueError if 'entry' is not stored.
+   """
+   Records the entry as a revision with the same id given in 'entry'. The old
+   entry previously corresponding to 'entry's id is given a new id which is stored
+   in 'entry's revision precedessor field.
+   Raises ValueError if 'entry' is not stored.
+   """
    def reviseEntry(self, entry):
       # An entry with the current ID exists, so make a revision. Store
       # the revision predecessor and guarantee that the current ID now
@@ -128,6 +139,10 @@ class RedisStore:
          assignments += map(self.getAssignment, loads(c.assignments))
       return assignments
 
+   """
+   Returns StoreEntry subclass object with 'constructor' with fields populated
+   based on the given 'id'.
+   """
    def _getEntry(self, constructor, id):
       entry = constructor()
       entry.setId(id)
@@ -138,10 +153,12 @@ class RedisStore:
       else:
          return None
 
-   # Adds the new 'childEntry'. 'parentEntry' should be already stored. parent is
-   # recorded in child hash, and child id is pushed to the child list at key
-   # 'parentListKey' on the parent.
-   # Raises ValueError if 'parentEntry' is not stored.
+   """
+   Adds the new 'childEntry'. 'parentEntry' should be already stored. parent is
+   recorded in child hash, and child id is pushed to the child list at key
+   'parentListKey' on the parent.
+   Raises ValueError if 'parentEntry' is not stored.
+   """
    def _registerEntry(self, parentEntry, childEntry, parentListKey):
       if parentEntry.getId() == None:
          raise ValueError('Parent entry (%s) not stored.' % str(type(parentEntry)))      
@@ -150,14 +167,24 @@ class RedisStore:
       self._addNewEntry(childEntry)
       self._pushToHashList(parentEntry.key(), parentListKey, childEntry.getId())
 
+   """
+   Adds given 'value' to the end of the list keyed at 'listKey' in the hash keyed
+   at 'hashKey' in the store.
+   """
    def _pushToHashList(self, hashKey, listKey, value):
       prev = loads(self.store.hget(hashKey, listKey))
       prev.append(value)
       self.store.hset(hashKey, listKey, prev)
 
+   """
+   Gives the entry a fresh ID and stores the entry under this ID in the store.
+   """
    def _addNewEntry(self, entry):
       entry.setId(self._getNewId(entry.suffix()))
       self.store.hmset(entry.key(), entry.hash())
 
+   """
+   Gets a new store ID that has never been used before.
+   """
    def _getNewId(self, suffix):
       return self.store.incr(_suffix('last_term_id', suffix))

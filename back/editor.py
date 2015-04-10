@@ -11,14 +11,22 @@ def validate_form(form, store, keys):
          return 'Unknown parent key.'
    return None
 
+"""
+TODO
+"""
 def add_course(self, request):
    return Response(dumps({
       'new': {}
    }))
 
-def add_assignment(course, title, store):
+"""
+Records a new assignment in 'store' for with given 'title', returning a JSON object
+of a single key 'new' containing fields for the new entry. Uses 'course' store key
+as the parent for the new assignment.
+"""
+def add_assignment(courseKey, title, store):
    a = model.Assignment(title)
-   store.addAssignment(a, store.getAgnostic(course)())
+   store.addAssignment(a, store.getAgnostic(courseKey)())
    return Response(dumps({
       'new': {
          'name': a.title,
@@ -27,6 +35,11 @@ def add_assignment(course, title, store):
       }
    }))
 
+"""
+Records new questions in 'store' for with given 'prompts', returning a JSON object
+of a single key 'new' containing fields for the new entry. Uses 'assignmentKey' store
+key as the parent for the new assignment.
+"""
 def add_questions(assignmentKey, prompts, store):
    assignment = store.getAgnostic(assignmentKey)()
    newQs = []
@@ -38,11 +51,17 @@ def add_questions(assignmentKey, prompts, store):
       'new': map(lambda q : { 'revision': q.key(), 'prompt': q.prompt }, newQs)
    }))
 
-def remove(self, request, store):
+"""
+TODO
+"""
+def remove(store):
    return Response('yeah, you betcha')
 
+"""
+Records a new 'hashValue' for the field under 'hashKey' in the hash referenced by
+'storeKey' in store.
+"""
 def revise(storeKey, hashKey, hashValue, store):
-   # Change hash_key's value and store the revision.
    entry = store.getAgnostic(storeKey)()
    entry[hashKey] = hashValue
    store.reviseEntry(entry)
