@@ -26,6 +26,7 @@ def subset(dict, keys):
 
 class PeerReviewService(object):
    def get_add_course(self, request):
+      # TODO: implement!
       return editor.add_course(request, self.store)
 
    def get_add_assignment(self, request):
@@ -36,20 +37,28 @@ class PeerReviewService(object):
       return editor.add_assignment(form.parent_key.data, form.title.data, self.store)
 
    def get_add_questions(self, request):
-      self._authenticate_edit(request)
+      # TODO: This redundancy is embarrassing.
+      unauth = self._authenticate_edit(request)
+      if unauth: return unauth
       form = forms.AddQuestionsForm(request.args)
       error = editor.validate_form(form, self.store, ['parent_key'])
       if error: return BadRequest(error)
       return editor.add_questions(form.parent_key.data, loads(form.prompts.data), self.store)
 
    def get_remove(self, request):
-      return editor.remove(request, self.store)
+      unauth = self._authenticate_edit(request)
+      if unauth: return unauth
+      form = forms.RemoveForm(request.args)
+      error = editor.validate_form(form, self.store, ['key'])
+      if error: return BadRequest(error)
+      return editor.remove(form.key.data, self.store)
 
    def get_revise(self, request):
-      self._authenticate_edit(request)
-      form = forms.ChangeForm(request.args)  #TODO: change back
+      unauth = self._authenticate_edit(request)
+      if unauth: return unauth
+      form = forms.ChangeForm(request.args)
       error = editor.validate_form(form, self.store, ['store_key'])
-      if error: return error
+      if error: return BadRequest(error)
       return editor.revise(form.store_key.data, form.hash_key.data, form.hash_value.data, self.store)
 
    def _authenticate_edit(self, request):
@@ -143,6 +152,7 @@ class PeerReviewService(object):
          Rule('/add/assignment', endpoint="add_assignment"),
          Rule('/add/questions', endpoint="add_questions"),
          Rule('/revise', endpoint="revise"),
+         Rule('/delete', endpoint="remove"),
          Rule('/survey/submit', endpoint="survey_submit"),
          Rule('/dashboard', endpoint='dashboard'),
          Rule('/survey', endpoint='survey'),
@@ -155,9 +165,9 @@ class PeerReviewService(object):
                                    autoescape=True)
 
    def wsgi_app(self, environ, start_response):
-      request = SessionRequest(environ);
-      response = self.dispatch_request(request);
-      return response(environ, start_response);
+      request = SessionRequest(environ)
+      response = self.dispatch_request(request)
+      return response(environ, start_response)
 
    def render(self, template_name, **context):
       t = self.jinja_env.get_template(template_name)

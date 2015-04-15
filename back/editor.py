@@ -8,7 +8,7 @@ def validate_form(form, store, keys):
    # TODO: Work this into the WTF validators.
    for k in keys:
       if form[k].data not in store:
-         return 'Unknown parent key.'
+         return 'Unknown key: {0}.'.format(form[k].data)
    return None
 
 """
@@ -54,7 +54,10 @@ def add_questions(assignmentKey, prompts, store):
 """
 TODO
 """
-def remove(store):
+def remove(key, store):
+   # TODO: use the visitor pattern on the model classes here.
+   # it's worth the coupling.
+   #store.remove(store.getAgnostic(key)())
    return Response('yeah, you betcha')
 
 """

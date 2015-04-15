@@ -15,8 +15,12 @@
          {{ lastSaved }}
          </div>
       </div>
-      <async-manager id="ajax"
-         success="{{ checkAsync | bindThis }}"
+      <async-manager id="reviser"
+         success="{{ checkRevision | bindThis }}"
+         loading="{{ loading }}">
+      </async-manager>
+      <async-manager id="remover"
+         success="{{ checkRemoval | bindThis }}"
          loading="{{ loading }}">
       </async-manager>
       <paper-progress indeterminate?="{{ loading }}"></paper-progress>
@@ -87,13 +91,12 @@ Polymer('editable-text', {
    },
 
    save: function() {
-      //this.unlocked = false;
-      console.log('Attempting save.');
+      // TODO: Lock while saving.
       if (this.storeKey && this.hashKey)
-         this.$.ajax.revise(this.storeKey, this.hashKey, this.getValue());
+         this.$.reviser.revise(this.storeKey, this.hashKey, this.getValue());
    },
 
-   checkAsync: function(evt) {
+   checkRevision: function(evt) {
       this.lastSaved = evt.detail.response['new'];
    },
 
@@ -121,6 +124,15 @@ Polymer('editable-text', {
 
    bindThis: function(fn) {
       return fn.bind(this);
+   },
+
+   remove: function() {
+      if (this.storeKey)
+         this.$.remover.remove(this.storeKey);
+   },
+
+   checkRemoval: function() {
+      
    }
 });
 

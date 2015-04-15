@@ -59,8 +59,11 @@ Polymer('async-manager', {
       this.sendRequest();
    },
 
-   remove: function() {
-      this.setURL('remove');
+   remove: function(key) {
+      this.setURL('delete');
+      this.$.ajax.params = JSON.stringify({
+         'key': key
+      });
       this.sendRequest();
    },
 

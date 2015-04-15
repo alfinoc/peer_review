@@ -13,7 +13,7 @@
 
 <polymer-element name="assignment-card-row">
    <template>
-      <link rel="stylesheet" type="text/css" href="assignment-card-row.css">
+      <link rel="stylesheet" type="text/css" href="course-card-row.css">
       <!-- Title and control buttons. -->
       <div layout horizontal>
          <paper-icon-button id="edit" noink
@@ -30,6 +30,10 @@
             hide?="{{ !open }}"
             icon="add"
             on-click="{{ pushQuestion }}"></paper-icon-button>
+         <paper-icon-button id="remove" mini noink
+            hide?="{{ !open }}"
+            icon="remove"
+            on-click="{{ popQuestion }}"></paper-icon-button>
       </div>
 
       <!-- Question list. -->
@@ -71,83 +75,9 @@
 
 Polymer('assignment-card-row', {
    publish: {
-      'storeKey': null,
-      'name': '',
-      'questions': [],
-      'open': false
-   },
-
-   created: function() {
-      this.questions = [];
-   },
-
-   domReady: function() {
-      this.hideSaveButton();
-      this.$.newtitle.value = this.name;
-   },
-
-   saveQuestions: function() {
-      this.hideSaveButton();
-      var newQuestions = [];
-      this.editables().forEach(function(q) {
-         if (!q.storeKey)
-            newQuestions.push(q.getValue());
-         else if (q.unsaved)
-            q.save();
-      });
-      if (newQuestions.length > 0)
-         this.$.qadder.addQuestions(this.storeKey, newQuestions);
-   },
-
-   addQuestionsCB: function(evt) {
-      var saved = this.questions.filter(function(q) {
-         return q.revision;
-      });
-      evt.detail.response['new'].forEach(function(q) {
-         saved.push(q);
-      });
-      this.questions = saved;
-   },
-
-   saveAssignment: function() {
-      this.$.areviser.revise(this.storeKey, 'title', this.$.newtitle.value);
-   },
-
-   saveAssignmentCB: function(evt) {
-      this.name = evt.detail.response['new'];
-   },
-
-   edit: function() {
-      this.$.editform.open();
-   },
-
-   showSaveButton: function() {
-      this.$.save.classList.remove('hide');
-   },
-
-   hideSaveButton: function() {
-      this.$.save.classList.add('hide');
-   },
-
-   pushQuestion: function() {
-      this.showSaveButton();
-      this.questions.push({ prompt: '' });
-   },
-
-   delete: function() {
-      console.log('unimplemented!');
-   },
-
-   toggleCollapseSection: function(evt) {
-      this.$.collapse.toggle();
-   },
-
-   editables: function() {
-      return this.querySelectorAll('* /deep/ editable-text').array();
-   },
-
-   bindThis: function(fn) {
-      return fn.bind(this);
+      shortName: '',
+      longName: '',
+      students: []
    }
 });
 

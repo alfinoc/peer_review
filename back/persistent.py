@@ -1,7 +1,7 @@
 from passlib.apps import custom_app_context as pwd_context
 from passlib.hash import sha256_crypt
 from bisect import bisect_left
-from json import loads
+from json import loads, dumps
 from functools import partial
 import redis
 
@@ -72,6 +72,19 @@ class RedisStore:
 
    def getAnswer(self, id):
       return self._getEntry(Answer, id)
+
+   """
+   Deletes the entry's key-hash pair and removes the entry's id from its parent's
+   hash list with given 'parentListKey'.
+   """
+   def _removeEntry(self, entry, parentListKey=None):
+      if entry.parent and parentListKey:
+         parent = self.getAgnostic(entry.parent)()
+         parentList = loads(parent[parentListKey])
+         parentList.remove(entry.id)
+         parent[parentListKey] = dumps(parentList)
+         self.reviseEntry(parent)
+      self.store.delete(entry.key())
 
    """
    Returns the getter function (self.*) for the entry with given key. Returned

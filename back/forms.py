@@ -56,6 +56,6 @@ class AddQuestionsForm(Form):
                             [validators.Required()])
    prompts = StringField('Title of the new assignment.', [jsonList])
 
-
 class RemoveForm(Form):
-   pass
+   key = StringField('Key of store entry to remove.',
+                     [validators.Required(), validate_suffix])

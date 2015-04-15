@@ -17,7 +17,7 @@ paper-radio-button::shadow #onRadio {
 
 #edit {
    position: absolute;
-   left: -32px;
+   left: -47px;
 }
 
 #edit:hover {
@@ -56,9 +56,6 @@ paper-radio-button::shadow #onRadio {
 
 :host {
    display: block;
-   padding: 10px;
-   padding-left: 15px;
-   paddin-right: 15px;
    position: relative;
 }
 

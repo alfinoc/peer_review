@@ -23,6 +23,27 @@ assignment-card::shadow paper-icon-button {
    color: #2196F3;
 }
 
+
+course-card {
+   background-color: #B2DFDB;
+}
+
+course-card::shadow h1 {
+   background-color: #009688;
+}
+
+course-card::shadow paper-fab {
+   color: #009688;
+}
+
+course-card::shadow paper-radio-button::shadow #onRadio {
+   background-color: #009688;
+}
+
+course-card::shadow paper-icon-button {
+   color: #009688;
+}
+
 /*
 dash-card:nth-child(2) {
    background-color: #B2DFDB;

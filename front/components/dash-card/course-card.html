@@ -1,0 +1,85 @@
+<link rel="import" href="/components/standard/core-icon/core-icon.html">
+<link rel="import" href="/components/standard/core-icons/editor-icons.html">
+<link rel="import" href="/components/standard/paper-fab/paper-fab.html">
+<link rel="import" href="/components/standard/core-collapse/core-collapse.html">
+<link rel="import" href="/components/standard/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="/components/standard/paper-button/paper-button.html">
+<link rel="import" href="/components/standard/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="/components/standard/paper-input/paper-input.html">
+
+<link rel="import" href="/components/dash-card/assignment-card-row.html">
+<link rel="import" href="/components/forms/async-manager.html">
+
+<polymer-element name="course-card">
+   <template>
+      <link rel="stylesheet" type="text/css" href="dash-card.css">
+      <link rel="stylesheet" type="text/css" href="course-card.css">
+      <!-- Card header. -->
+      <h1 layout horizontal>
+         <span flex self-center>Courses</span>
+         <paper-fab class="headerbutton" mini self-center 
+            icon="add"
+            on-click="{{ showDialog }}"></paper-fab>
+      </h1>
+      <div class="content">
+         <ul class="toplevel">
+            <template repeat="{{ c in courses }}">
+               <li class="courserow">
+                  {{ c.longname }} <span class="sub">{{ c.shortname }}</span>
+               </li>
+            </template>
+         </ul>
+      </div>
+      <!-- Assignment edit dialog. -->
+      <paper-action-dialog id="addform" backdrop>
+         <div layout horizontal>
+            <h1 flex>Add Course</h1>
+         </div>
+         <div layout vertical class="form">
+            <paper-input id="newcourseshorttitle"
+               floatinglabel
+               label="Short Title">
+            </paper-input>
+            <paper-input id="newcourselongtitle"
+               floatinglabel
+               label="Long Title">
+            </paper-input>
+         </div>
+         <paper-button dismissive>Cancel</paper-button>
+         <paper-button affirmative on-click="{{ addCourse }}">Save</paper-button>
+      </paper-action-dialog>
+
+      <async-manager id="ajax" success="{{ addCourseCB | bindThis }}"></async-manager>
+   </template>
+      <script>
+
+Polymer('course-card', {
+   publish: {
+      'courses': []
+   },
+
+   created: function() {
+      this.courses = [];
+   },
+
+   showDialog: function() {
+      this.$.addform.toggle();
+   },
+
+   addCourse: function() {
+      var shortName = this.$.newcourseshorttitle.value;
+      var longName = this.$.newcourselongtitle.value;
+      this.$.ajax.addCourse(course, shortName, longName);
+   },
+
+   addCourseCB: function(evt) {
+      // this.courses.push(evt.detail.response['new'])
+   },
+
+   bindThis: function(fn) {
+      return fn.bind(this);
+   }
+});
+
+   </script>
+</polymer-element>
