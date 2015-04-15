@@ -63,7 +63,7 @@ class RedisStore:
    Deletes the entry's key-hash pair and removes the entry's id from its parent's
    hash list with given 'parentListKey'.
    """
-   def _removeEntry(self, entry, parentListKey=None):
+   def removeEntry(self, entry, parentListKey=None):
       if entry.parent and parentListKey:
          parent = self.getAgnostic(entry.parent)()
          parentList = loads(parent[parentListKey])
@@ -154,9 +154,9 @@ class RedisStore:
 
    """
    Adds the 'course' as a new entry. Courses have no parents, so this is a distinct
-   action from _registerEntry.
+   action from registerEntry.
    """
-   def _registerCourse(self, course):
+   def registerCourse(self, course):
       self._addNewEntry(course)
       self.store.rpush('all_courses', course.getId())
 
@@ -166,7 +166,7 @@ class RedisStore:
    'parentListKey' on the parent.
    Raises ValueError if 'parentEntry' is not stored.
    """
-   def _registerEntry(self, parentEntry, childEntry, parentListKey):
+   def registerEntry(self, parentEntry, childEntry, parentListKey):
       if parentEntry.getId() == None:
          raise ValueError('Parent entry (%s) not stored.' % str(type(parentEntry)))      
 

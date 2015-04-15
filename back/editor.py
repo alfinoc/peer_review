@@ -55,9 +55,8 @@ def add_questions(assignmentKey, prompts, store):
 TODO
 """
 def remove(key, store):
-   # TODO: use the visitor pattern on the model classes here.
-   # it's worth the coupling.
-   #store.remove(store.getAgnostic(key)())
+   entry = store.getAgnostic(key)()
+   entry.remove(store)
    return Response('yeah, you betcha')
 
 """
@@ -67,5 +66,5 @@ Records a new 'hashValue' for the field under 'hashKey' in the hash referenced b
 def revise(storeKey, hashKey, hashValue, store):
    entry = store.getAgnostic(storeKey)()
    entry[hashKey] = hashValue
-   store.reviseEntry(entry)
+   entry.revise(store)
    return Response(dumps({ 'new': str(hashValue) }))
