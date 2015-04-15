@@ -26,7 +26,7 @@ as the parent for the new assignment.
 """
 def add_assignment(courseKey, title, store):
    a = model.Assignment(title)
-   store.addAssignment(a, store.getAgnostic(courseKey)())
+   a.add(a, store.getAgnostic(courseKey)(), store)
    return Response(dumps({
       'new': {
          'name': a.title,
@@ -45,7 +45,7 @@ def add_questions(assignmentKey, prompts, store):
    newQs = []
    for p in prompts:
       q = model.Question(p)
-      store.addQuestion(q, assignment)
+      q.add(assignment, store)
       newQs.append(q)
    return Response(dumps({
       'new': map(lambda q : { 'revision': q.key(), 'prompt': q.prompt }, newQs)

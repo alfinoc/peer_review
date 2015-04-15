@@ -46,20 +46,6 @@ class RedisStore:
          return pwd_context.verify(password, self.store.hget(key, 'password'))
       return False
 
-   # Adders.
-   def addCourse(self, course):
-      self._addNewEntry(course)
-      self.store.rpush('all_courses', course.getId())
-
-   def addAssignment(self, assignment, course):
-      self._registerEntry(course, assignment, 'assignments')
-
-   def addQuestion(self, question, assignment):
-      self._registerEntry(assignment, question, 'questions')
-
-   def addAnswer(self, answer, question):
-      self._registerEntry(question, answer, 'answers')
-
    # Getters.
    def getCourse(self, id):
       return self._getEntry(Course, id)
@@ -165,6 +151,14 @@ class RedisStore:
          return entry
       else:
          return None
+
+   """
+   Adds the 'course' as a new entry. Courses have no parents, so this is a distinct
+   action from _registerEntry.
+   """
+   def _registerCourse(self, course):
+      self._addNewEntry(course)
+      self.store.rpush('all_courses', course.getId())
 
    """
    Adds the new 'childEntry'. 'parentEntry' should be already stored. parent is

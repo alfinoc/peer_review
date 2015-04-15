@@ -66,6 +66,9 @@ class StoreEntry:
          raise KeyError()
       return setattr(self, key, value)
 
+   def revise(self, store):
+      store.reviseEntry(self)
+
 class Course(StoreEntry):
    typeSuffix = 'course'
    def __init__(self, title='Untitled', assignments=[], participants=[]):
@@ -73,6 +76,9 @@ class Course(StoreEntry):
       self.addSerialProperty('title', title)
       self.addSerialProperty('assignments', assignments)
       self.addSerialProperty('participants', participants)
+
+   def add(self, store):
+      store._registerCourse(self)
 
 class Assignment(StoreEntry):
    typeSuffix = 'asst'
@@ -82,6 +88,9 @@ class Assignment(StoreEntry):
       self.addSerialProperty('questions', questions)
       self.addSerialProperty('assigned', assigned)
 
+   def add(self, course, store):
+      store._registerEntry(course, self, 'assignments')
+
 class Question(StoreEntry):
    typeSuffix = 'quest'
    def __init__(self, prompt='Question Prompt'):
@@ -89,9 +98,15 @@ class Question(StoreEntry):
       self.addSerialProperty('prompt', prompt)
       self.addSerialProperty('answers', [])
 
+   def add(self, assignment, store):
+      store._registerEntry(assignment, self, 'questions')
+
 class Answer(StoreEntry):
    typeSuffix = 'answer'
    def __init__(self, text='', value=None):
       StoreEntry.__init__(self)
       self.addSerialProperty('text', text)
       self.addSerialProperty('value', value)
+
+   def add(self, question, store):
+      store._registerEntry(question, self, 'answers')
