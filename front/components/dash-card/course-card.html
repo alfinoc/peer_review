@@ -69,11 +69,11 @@ Polymer('course-card', {
    addCourse: function() {
       var shortName = this.$.newcourseshorttitle.value;
       var longName = this.$.newcourselongtitle.value;
-      this.$.ajax.addCourse(course, shortName, longName);
+      this.$.ajax.addCourse(shortName, longName);
    },
 
    addCourseCB: function(evt) {
-      // this.courses.push(evt.detail.response['new'])
+      this.courses.push(evt.detail.response['new']);
    },
 
    bindThis: function(fn) {

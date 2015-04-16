@@ -12,11 +12,16 @@ def validate_form(form, store, keys):
    return None
 
 """
-TODO
+Records a new course with given short (course code) and long (full description) names.
 """
-def add_course(self, request):
+def add_course(short, long, store):
+   c = model.Course(short, long)
+   c.add(store)
    return Response(dumps({
-      'new': {}
+      'new': {
+         'shortname': c.short,
+         'longname': c.long
+      }
    }))
 
 """
@@ -52,7 +57,7 @@ def add_questions(assignmentKey, prompts, store):
    }))
 
 """
-TODO
+Removes the entry from its parent list, retaining the hash in the store as an archive.
 """
 def remove(key, store):
    entry = store.getAgnostic(key)()

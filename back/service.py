@@ -26,8 +26,11 @@ def subset(dict, keys):
 
 class PeerReviewService(object):
    def get_add_course(self, request):
-      # TODO: implement!
-      return editor.add_course(request, self.store)
+      self._authenticate_edit(request)
+      form = forms.AddCourseForm(request.args)
+      error = editor.validate_form(form, self.store, [])
+      if error: return BadRequest(error)
+      return editor.add_course(form.short_name.data, form.long_name.data, self.store)
 
    def get_add_assignment(self, request):
       self._authenticate_edit(request)

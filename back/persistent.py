@@ -60,17 +60,23 @@ class RedisStore:
       return self._getEntry(Answer, id)
 
    """
-   Deletes the entry's key-hash pair and removes the entry's id from its parent's
-   hash list with given 'parentListKey'.
+   Removes the course from the full list of active courses.
+   The hash for the course entry is left in the store.
    """
-   def removeEntry(self, entry, parentListKey=None):
-      if entry.parent and parentListKey:
-         parent = self.getAgnostic(entry.parent)()
-         parentList = loads(parent[parentListKey])
-         parentList.remove(entry.id)
-         parent[parentListKey] = dumps(parentList)
-         self.reviseEntry(parent)
-      self.store.delete(entry.key())
+   def removeCourse(self, course):
+      index = self.store.lrange('all_courses', 0, -1).index(course.id)
+      self.store.lrem('all_courses', index)
+
+   """
+   Removes the entry's id from its parent's hash list with given 'parentListKey'.
+   The hash for the entry is left in the store.
+   """
+   def removeFromParent(self, entry, parentListKey):
+      parent = self.getAgnostic(entry.parent)()
+      parentList = loads(parent[parentListKey])
+      parentList.remove(entry.id)
+      parent[parentListKey] = dumps(parentList)
+      self.reviseEntry(parent)
 
    """
    Returns the getter function (self.*) for the entry with given key. Returned

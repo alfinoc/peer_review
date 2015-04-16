@@ -53,8 +53,8 @@ Polymer('async-manager', {
    addCourse: function(shortName, longName) {
       this.setURL('add/course');
       this.$.ajax.params = JSON.stringify({
-         'shortname': shortName,
-         'longname': longName
+         'short_name': shortName,
+         'long_name': longName
       });
       this.sendRequest();
    },

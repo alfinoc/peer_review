@@ -46,6 +46,10 @@ class ChangeForm(Form):
    hash_key = StringField('Entry Key', [validators.Required(), editable])
    hash_value = StringField('Entry Value', [validators.Required()])
 
+class AddCourseForm(Form):
+   short_name = StringField('Short title of the new course.', [validators.Required()])
+   long_name = StringField('Long title of the new course.', [validators.Required()])
+
 class AddAssignmentForm(Form):
    parent_key = StringField('Key of parent store entry (suffix and ID).',
                             [validators.Required()])

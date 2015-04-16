@@ -73,19 +73,23 @@ class StoreEntry:
       store.reviseEntry(self)
 
    def remove(self, store):
-      store.removeEntry(self, self.parentListKey)
+      store.removeFromParent(self, self.parentListKey)
 
 class Course(StoreEntry):
    typeSuffix = 'course'
    parentListKey = None
-   def __init__(self, title='Untitled', assignments=[], participants=[]):
+   def __init__(self, shortName='Untitled', longName=''):
       StoreEntry.__init__(self)
-      self.addSerialProperty('title', title)
-      self.addSerialProperty('assignments', assignments)
-      self.addSerialProperty('participants', participants)
+      self.addSerialProperty('short', shortName)
+      self.addSerialProperty('long', longName)
+      self.addSerialProperty('assignments', [])
+      self.addSerialProperty('participants', [])
 
    def add(self, store):
       store.registerCourse(self)
+
+   def remove(self, store):
+      store.removeCourse(self)
 
 class Assignment(StoreEntry):
    typeSuffix = 'asst'
