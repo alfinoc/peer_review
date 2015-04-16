@@ -61,6 +61,7 @@ paper-radio-button::shadow #onRadio {
 
 ol {
    margin: 10px;
+   margin-right: 0px;
    font-size: smaller;
    padding-left: 25px;
 }

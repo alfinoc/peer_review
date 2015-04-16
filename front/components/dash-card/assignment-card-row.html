@@ -23,7 +23,7 @@
          <div class="clickable" on-click="{{ toggleCollapseSection }}" flex self-center>
             {{ name || 'Untitled' }}
          </div>
-         <paper-icon-button id="save" class="hide" mininoink
+         <paper-icon-button id="save" class="hide" mini noink
             icon="save"
             on-click="{{ saveQuestions }}"></paper-icon-button>
          <paper-icon-button id="add" mini noink
@@ -42,7 +42,8 @@
                         value="{{ q.prompt }}"
                         storeKey="{{ q.revision }}"
                         hashKey="prompt"
-                        on-unsaved="{{ showSaveButton }}">
+                        on-unsaved="{{ showSaveButton }}"
+                        on-remove="{{ removeQuestionCB }}">
                      </editable-text>
                   </li>
                </template>
@@ -107,6 +108,15 @@ Polymer('assignment-card-row', {
          saved.push(q);
       });
       this.questions = saved;
+   },
+
+   removeQuestionCB: function(evt) {
+      for (var i = 0; i < this.questions.length; i++) {
+         if (evt.detail.key == this.questions[i].revision) {
+            this.questions.splice(i, 1);
+            return;
+         }
+      }
    },
 
    saveAssignment: function() {

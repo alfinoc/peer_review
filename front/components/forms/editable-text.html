@@ -1,3 +1,4 @@
+<link rel="import" href="/components/standard/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="/components/standard/core-ajax/core-ajax.html">
 <link rel="import" href="/components/standard/paper-toast/paper-toast.html">
 <link rel="import" href="/components/standard/paper-progress/paper-progress.html">
@@ -7,21 +8,28 @@
 <polymer-element name="editable-text">
    <template>
       <link rel="stylesheet" type="text/css" href="editable-text.css">
-      <div id="wrapper">
-         <div id="input"
+      <div id="wrapper" layout horizontal>
+         <div id="input" flex
             saved?="{{ !unsaved }}"
             on-dblclick="{{ unlock }}"
             on-blur="{{ lock }}">
          {{ lastSaved }}
          </div>
+         <template if="{{ removeButton }}">
+            <paper-icon-button id="remove" self-center
+               noink
+               icon="close"
+               on-click="{{ remove }}">
+            </paper-icon-button>
+            <async-manager id="remover"
+               success="{{ checkRemoval | bindThis }}"
+               loading="{{ removerLoading }}">
+            </async-manager>
+         </template>
       </div>
       <async-manager id="reviser"
          success="{{ checkRevision | bindThis }}"
-         loading="{{ loading }}">
-      </async-manager>
-      <async-manager id="remover"
-         success="{{ checkRemoval | bindThis }}"
-         loading="{{ loading }}">
+         loading="{{ reviserLoading }}">
       </async-manager>
       <paper-progress indeterminate?="{{ loading }}"></paper-progress>
    </template>
@@ -38,12 +46,18 @@ Polymer('editable-text', {
       storeKey: '',
       hashKey: '',
       lastSaved: '',
-      auto: false,
-      loading: false
+      removeButton: true,
+      auto: false
    },
 
    computed: {
       unsaved: 'lastSaved != value',
+      loading: 'reviserLoading || removerLoading'
+   },
+
+   created: function() {
+      this.reviserLoading = false;
+      this.removerLoading = false;
    },
 
    domReady: function() {
@@ -132,7 +146,7 @@ Polymer('editable-text', {
    },
 
    checkRemoval: function() {
-      
+      this.fire('remove', { key: this.storeKey });
    }
 });
 

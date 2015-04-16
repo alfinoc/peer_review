@@ -73,7 +73,7 @@ class StoreEntry:
       store.reviseEntry(self)
 
    def remove(self, store):
-      store.removeEntry(course, self, self.parentListKey)
+      store.removeEntry(self, self.parentListKey)
 
 class Course(StoreEntry):
    typeSuffix = 'course'

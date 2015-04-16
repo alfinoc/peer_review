@@ -12,7 +12,7 @@
    <link rel="import" href="components/standard/polymer/polymer.html">
    <link rel="import" href="components/controllers/prof-dashboard.html">
 </head>
-<body>
+<body unresolved>
    <prof-dashboard>
       {% for a in assignments %}
          <assignment name="{{ a.title }}" revision="{{ a.key() }}">

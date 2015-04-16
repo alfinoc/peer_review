@@ -57,7 +57,7 @@ TODO
 def remove(key, store):
    entry = store.getAgnostic(key)()
    entry.remove(store)
-   return Response('yeah, you betcha')
+   return Response(dumps({ 'new': '' }))
 
 """
 Records a new 'hashValue' for the field under 'hashKey' in the hash referenced by
